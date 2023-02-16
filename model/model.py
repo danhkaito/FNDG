@@ -13,6 +13,7 @@ class FakeNewsModel(torch.nn.Module):
         self.style_enc = nn.Linear(num_style_feature, num_feature_concat)
         self.conv1 = SAGEConv(2*num_feature_concat, hidden_channels_1)
         self.conv2 = SAGEConv(hidden_channels_1, hidden_channels_2)
+        self.conv3 = SAGEConv(hidden_channels_2, hidden_channels_2)
 
         self.out = nn.Linear(hidden_channels_2, num_classes)
 
@@ -34,6 +35,9 @@ class FakeNewsModel(torch.nn.Module):
         # x = self.conv3(x, edge_index)
         # x = x.relu()
         # x = F.dropout(x, p=0.5, training=self.training)
+        x = self.conv3(x, edge_index)
+        x = x.relu()
+        x = F.dropout(x, p=0.5, training=self.training)
 
         # Output layer 
         x = self.out(x)
