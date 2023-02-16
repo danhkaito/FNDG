@@ -2,27 +2,30 @@ from model.KSOM.PNode import *
 from model.KSOM.CNode import *
 from model.KSOM.CSom import *
 
-import math
-import numpy as np
-import string
-import pymongo
-import re
-import sys
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-import pickle 
-from utils import *
-import unicodedata as ud
-import scipy
-from sklearn.model_selection import train_test_split
+import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+# import pickle 
+# from utils import *
+# import unicodedata as ud
+# import scipy
+# from sklearn.model_selection import train_test_split
 
-data_train=load_pickle('../dataset/data_preprocess_imbalance_train')
-print(len(data_train))
-print("Done Preprocess")
+
+# Read data
+train_df = pd.read_csv('benchmark_data\\Liar\\train.csv')
+test_df = pd.read_csv('benchmark_data\\Liar\\test.csv')
+
+train_X = train_df['Statement'].values
+train_Y = train_df['Label'].values
+
+test_X = train_df['Statement'].values
+test_Y = train_df['Label'].values
+
 
 # print(len(data_train))
 
-doc_2_vec = TfidfVectorizer(max_features=3000, lowercase=False)
-model = CSom(15, data_train, [0.25, 0.75], 2 ,10000, doc_2_vec)
+doc_2_vec = TfidfVectorizer(min_df = 2, max_df = 0.5, ngram_range = (1,1), stop_words = 'english')
+model = CSom(200, train_X, 100000, doc_2_vec)
 model.Train()
 # PNodes = TfidfVectorizer()
 # PNodes = PNodes.fit_transform(corpus_val).todense()
