@@ -2,3 +2,4 @@
 *.ckpt
 Entities
 *.pt
+model_save
