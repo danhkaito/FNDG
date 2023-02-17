@@ -1,2 +1,4 @@
 import numpy as np
-print(type(np.random.randint(10, size=1)))
+rand_arr = np.asarray([j for j in range(100)])
+np.random.shuffle(rand_arr)
+print(rand_arr)

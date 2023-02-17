@@ -24,9 +24,10 @@ test_Y = train_df['Label'].values
 
 # print(len(data_train))
 
-doc_2_vec = TfidfVectorizer(min_df = 2, max_df = 0.5, ngram_range = (1,1), stop_words = 'english')
-model = CSom(200, train_X, 100000, doc_2_vec)
+doc_2_vec = TfidfVectorizer(min_df = 2, max_df = 0.8, ngram_range = (1,1), stop_words = 'english')
+model = CSom(20, train_X, train_Y, 50000, doc_2_vec)
 model.Train()
+model.map_PNode2CNode()
 # PNodes = TfidfVectorizer()
 # PNodes = PNodes.fit_transform(corpus_val).todense()
 
@@ -37,7 +38,7 @@ model.Train()
 #     SuitNode.addPNode(corpus_val[i], PNodes[i])
 
 print("Saving Model...")
-ksom_Weights=open('./model/KSOM/ksom_model.ckpt', 'wb')
+ksom_Weights=open('./model/KSOM/ksom_model_50k.ckpt', 'wb')
 model.save(ksom_Weights)
 print("Finish Saving Model")
 

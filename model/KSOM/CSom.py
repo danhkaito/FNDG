@@ -4,15 +4,17 @@ from  model.KSOM.PNode import *
 
 import math
 import numpy as np
+from tqdm import tqdm
 # import copy
 # from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 # from matplotlib import pyplot as plt
 
 class CSom:
-    def __init__(self, MapSize, data_posts, numIterations, doc_2_vectorizer, constStartLearningRate=0.5):
+    def __init__(self, MapSize, train_X, train_Y, numIterations, doc_2_vectorizer, constStartLearningRate=0.5):
         self.MapSize = MapSize
-        self.corpus = data_posts
+        self.corpus = train_X
+        self.labels = train_Y
         self.numIterations = numIterations
         self.dMapRadius = MapSize / 2
         self.dTimeConstant = numIterations / math.log(self.dMapRadius)
@@ -27,7 +29,7 @@ class CSom:
         #         print("Nastsss")
         # print(self.PNodes_writingstyle_encode[1])
         # print(np.squeeze(np.asarray(self.PNodes_content_endcode[0])))
-        self.PNodes=np.asarray([PNode(corpus=self.corpus[i], vector=np.squeeze(np.asarray(self.PNodes_content_endcode[i]))) for i in range(len(self.corpus))])
+        self.PNodes=np.asarray([PNode(corpus=self.corpus[i], label=self.labels[i], vector=np.squeeze(np.asarray(self.PNodes_content_endcode[i]))) for i in range(len(self.corpus))])
         print("Done TFIDF")
         # print(self.PNodes[1])
         Node_content_Dimension = self.PNodes_content_endcode.shape[1]
@@ -48,7 +50,7 @@ class CSom:
         winner = None
         PNode = inputPNode
         for iy, ix in np.ndindex(self.m_Som.shape):
-            dist = self.calc_euclid_distance(self.m_Som[iy, ix], PNode)
+            dist = self.calc_cosine_distance(self.m_Som[iy, ix], PNode)
             if dist < LowestDistance:
                 # if len(self.m_Som[iy, ix].PNodes) > 0:
                 #     totalSim = 0
@@ -84,8 +86,9 @@ class CSom:
     
     def Train(self):
         print("Start Training")
-        for i in range(self.numIterations):
-            print(f"Epoch {i}")
+        
+        for i in tqdm(range(self.numIterations)):
+            # print(f"Epoch {i}")
             randomPNode = self.PNodes[int(np.random.randint(self.PNodes.shape[0], size=1))]
             WinningNode, grid_x, grid_y = self.FindBestMatchingNode(randomPNode)
             dNeighbourhoodRadius = self.dMapRadius * math.exp(-float(i) / self.dTimeConstant)
@@ -103,12 +106,14 @@ class CSom:
             #     for iy, ix in np.ndindex(self.m_Som.shape):
             #       f.write(f"{iy} {ix} {self.m_Som[iy,ix]} \n")
 
-
-        # for i in range(self.PNodes.shape[0]):
-        #     SuitNode = self.FindBestMatchingNode(self.PNodes[i])
-        #     # print(self.PNodes[i])
-        #     # print(SuitNode)
-        #     SuitNode.addPNode(self.corpus[i], self.PNodes[i])
+    def map_PNode2CNode(self):
+        print("Start Mapping")
+        for i in tqdm(range(self.PNodes.shape[0])):
+            SuitNode, _, _ = self.FindBestMatchingNode(self.PNodes[i])
+            # print(self.PNodes[i])
+            # print(SuitNode)
+            SuitNode.addPNode(self.PNodes[i])
+        print('Done Mapping')
 
     # def Plot(self):
     #     plt.rcParams["figure.autolayout"] = True

@@ -16,3 +16,10 @@ class CNode(Node):
     def addPNode(self, inputNode):
         self.PNodes.append(inputNode)
         return
+    
+    def print_PNodes(self):
+        if len(self.PNodes) == 0:
+            print("No corpus")
+            return
+        for node in self.PNodes:
+            print((node.corpus, node.label))
