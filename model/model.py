@@ -9,20 +9,18 @@ class FakeNewsModel(torch.nn.Module):
         torch.manual_seed(42)
 
         # Initialize the layers
-        self.post_enc = nn.Linear(num_content_feature, num_feature_concat)
-        self.style_enc = nn.Linear(num_style_feature, num_feature_concat)
-        self.conv1 = SAGEConv(2*num_feature_concat, hidden_channels_1)
+        self.conv1 = SAGEConv(num_content_feature, hidden_channels_1)
         self.conv2 = SAGEConv(hidden_channels_1, hidden_channels_2)
 
         self.out = nn.Linear(hidden_channels_2, num_classes)
 
-    def forward(self, x_content, x_style, edge_index, edge_type):
+    def forward(self, x_content, edge_index, edge_type):
         
-        x_content_enc = self.post_enc(x_content)
-        x_style_content = self.style_enc(x_style)
-        x = torch.cat((x_content_enc, x_style_content),1)
-        # First Message Passing Layer (Transformation)
-        x = self.conv1(x, edge_index)
+        # x_content_enc = self.post_enc(x_content)
+        # x_style_content = self.style_enc(x_style)
+        # x = torch.cat((x_content_enc, x_style_content),1)
+        # # First Message Passing Layer (Transformation)
+        x = self.conv1(x_content, edge_index)
         x = x.relu()
         x = F.dropout(x, p=0.5, training=self.training)
 

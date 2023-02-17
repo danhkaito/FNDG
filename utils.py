@@ -30,15 +30,12 @@ def load_pickle(filepath):
         data=pickle.load(inp)
     return data
 
-def create_pnode(model, pre_data):
-    corpus = [x[1] for x in pre_data]
-    writing_style = [x[2] for x in pre_data]
+def create_pnode(corpus,  pre_data, labels):
     # print(corpus[0])
     # exit()
     # PNodes = TfidfVectorizer(tokenizer=identity_tokenizer, lowercase=False)
-    PNodes_content_endcode = model.doc_2_vectorizer.transform(corpus).todense()
-    PNodes_writingstyle_encode = np.array(writing_style)
-    PNodes=np.asarray([PNode(corpus=corpus[i], num_component=2, vectors=[np.squeeze(np.asarray(PNodes_content_endcode[i])), PNodes_writingstyle_encode[i]]) for i in range(len(corpus))])
+    PNodes_content_endcode = pre_data
+    PNodes=np.asarray([PNode(corpus=corpus[i], label=labels[i], vector=np.squeeze(np.asarray(PNodes_content_endcode[i]))) for i in range(len(corpus))])
     return PNodes
 
 def get_parser():

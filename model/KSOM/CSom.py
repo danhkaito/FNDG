@@ -116,7 +116,7 @@ class CSom:
             SuitNode, _, _ = self.FindBestMatchingNode(self.PNodes[i], method)
             # print(self.PNodes[i])
             # print(SuitNode)
-            SuitNode.addPNode(self.PNodes[i])
+            SuitNode.addPNode(self.PNodes[i], i)
         print('Done Mapping')
 
     # def Plot(self):

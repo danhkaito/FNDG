@@ -20,10 +20,10 @@ from torch_geometric.nn import SAGEConv, GCNConv
 from model.model import *
 
 
-features_content, features_style, edge_index, edge_type, labels = data_load.load_data_fakenews(True)
+features_content, edge_index, edge_type, labels = data_load.load_data_fakenews(True)
 print(len(edge_type))
 print(len(edge_type))
-
+# exit()
 # y = torch.from_numpy(labels).type(torch.long)
 
 print(labels[0])
@@ -55,13 +55,13 @@ test_mask[X_test] = True
 #     train_mask[i] = False
 
 
-model_fakenew = FakeNewsModel(hidden_channels_1=64, hidden_channels_2=16, num_feature_concat=100, num_content_feature=3000, num_style_feature=2, num_classes=2)
+model_fakenew = FakeNewsModel(hidden_channels_1=64, hidden_channels_2=16, num_feature_concat=100, num_content_feature=768, num_style_feature=2, num_classes=2)
 print(model_fakenew)
 # Use GPU
 print("cuda:0" if torch.cuda.is_available() else "cpu")
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 features_content = features_content.to(device)
-features_style = features_style.to(device)
+# features_style = features_style.to(device)
 edge_index = edge_index.to(device)
 edge_type = edge_type.to(device)
 labels = labels.to(device)
@@ -84,7 +84,7 @@ def train():
       model_fakenew.train()
       optimizer.zero_grad() 
       # Use all data as input, because all nodes have node features
-      out = model_fakenew(features_content, features_style, edge_index, edge_type)  
+      out = model_fakenew(features_content, edge_index, edge_type)  
       # Only use nodes with labels available for loss calculation --> mask
       loss = criterion(out[train_mask], labels[train_mask])  
       loss.backward() 
@@ -95,7 +95,7 @@ def train():
 @torch.no_grad()
 def test():
     model_fakenew.eval()
-    out = model_fakenew(features_content, features_style, edge_index, edge_type)
+    out = model_fakenew(features_content, edge_index, edge_type)
     # Use the class with highest probability.
     pred = out.argmax(dim=1)
     # Check against ground-truth labels.

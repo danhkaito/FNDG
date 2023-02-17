@@ -8,9 +8,9 @@ import utils
 from collections import defaultdict
 import networkx as nx
 import pickle
-
+import pandas as pd
 IMBALANCE_THRESH = 101
-RADIUS_MAP = 15
+RADIUS_MAP = 25
 
 
 def build_graph_ksom(model, ):
@@ -34,7 +34,7 @@ def build_graph_ksom(model, ):
                     idx_cnode_neighbor=RADIUS_MAP*x_idx+y_idx
                     if (idx_cnode,idx_cnode_neighbor) not in edge_dict and (idx_cnode_neighbor,idx_cnode) not in edge_dict:
                         # print("Go here")
-                        weights=model.CalculateDistance2CNode(model.m_Som[ix, iy], model.m_Som[x_idx, y_idx])
+                        weights=model.calc_euclid_distance(model.m_Som[ix, iy], model.m_Som[x_idx, y_idx])
                         # print("W" + str(weights))
                         print("DBG "+str((idx_cnode, idx_cnode_neighbor)))
                         edge_weighted_list.append([idx_cnode, idx_cnode_neighbor, 1.0])
@@ -50,15 +50,15 @@ def build_leaf_node_ksom(model, PNodes_arr, lst_weight_edge, lst_edge_type):
     sum_quan_err=0
     for i in range(PNodes_arr.shape[0]):
       
-        SuitNode, ix, iy = model.FindBestMatchingNode(PNodes_arr[i])
-        weight_val= model.CalculateDistance_PNode2CNode(PNodes_arr[i], SuitNode)
+        SuitNode, ix, iy = model.FindBestMatchingNode(PNodes_arr[i], 'euclid')
+        weight_val= model.calc_euclid_distance(PNodes_arr[i], SuitNode)
         # SuitNode.addPNode(PNodes_arr[i], i)
         sum_quan_err+=weight_val
         lst_weight_edge.append([RADIUS_MAP*iy+ix, idx_start, 1.0])
         lst_edge_type[(RADIUS_MAP*iy+ix, idx_start)]=1
         for node_idx in model.m_Som[iy, ix].PNodes:
             # print(f"Node {iy}, {ix}\n")
-            weight_pnode2pnode=model.CalculateCosine2PNode(model.m_Som[iy, ix].PNodes[node_idx], PNodes_arr[i])
+            weight_pnode2pnode=model.calc_cosine_distance(model.m_Som[iy, ix].PNodes[node_idx], PNodes_arr[i])
             # print(f"{weight_pnode2pnode}\n")
             if weight_pnode2pnode < 0.7:
                 continue
@@ -73,10 +73,9 @@ def build_leaf_node_ksom(model, PNodes_arr, lst_weight_edge, lst_edge_type):
 def load_data_fakenews(preload):
 
     if preload == False:
-        model_ksom= utils.load_pickle('./model/KSOM/ksom_model.ckpt')
-        processed_data= utils.load_pickle('../dataset/data_preprocess_imbalance_train')
-        PNodes_arr = utils.create_pnode(model_ksom, processed_data)
-
+        model_ksom= utils.load_pickle('./model/KSOM/ksom_model_100k_euclid.ckpt')
+        # processed_data= utils.load_pickle('../dataset/data_preprocess_imbalance_train')
+        PNodes_arr = np.copy(model_ksom.PNodes)
         G, pos, edge_list, edge_type_lst=build_graph_ksom(model_ksom)
         print(len(edge_list))
         edge_list, edge_type_lst=build_leaf_node_ksom(model_ksom, PNodes_arr , edge_list, edge_type_lst)
@@ -131,8 +130,8 @@ def load_data_fakenews(preload):
         for i in range(0, RADIUS_MAP*RADIUS_MAP):
             labels_node[i]=2.0
 
-        for i in range(0, len(processed_data)):
-            labels_node[RADIUS_MAP*RADIUS_MAP+i]=float(processed_data[i][-1]==True)
+        for i in range(0, len(PNodes_arr)):
+            labels_node[RADIUS_MAP*RADIUS_MAP+i]=float(PNodes_arr[i].label==False)
         values=[labels_node.get(val, 5.0) for val in G.nodes()]
 
         labels=np.array(values).astype(np.int64)
@@ -143,8 +142,8 @@ def load_data_fakenews(preload):
         utils.print_edges_num(adj.todense(), labels)
 
         
-        embeddings_content = np.empty((RADIUS_MAP*RADIUS_MAP+len(processed_data), 3000))
-        embeddings_style = np.empty((RADIUS_MAP*RADIUS_MAP+len(processed_data), 2))
+        embeddings_content = np.empty((RADIUS_MAP*RADIUS_MAP+len(PNodes_arr), 768))
+        # embeddings_style = np.empty((RADIUS_MAP*RADIUS_MAP+len(processed_data), 2))
     # for ix, iy in np.ndindex(model.m_Som.shape):
     #     temp=tuple()
     #     for w in model.m_Som[ix, iy].dWeights:
@@ -153,47 +152,47 @@ def load_data_fakenews(preload):
 
         for iy, ix in np.ndindex(model_ksom.m_Som.shape):
             cNode = model_ksom.m_Som[iy, ix]
-            t1=np.empty((0,3000))
-            t2=np.empty((0,2))
+            t1=np.empty((0,768))
+            # t2=np.empty((0,2))
             if len(cNode.PNodes)>0:
                 for i in cNode.PNodes.keys():
-                    t1=np.append(t1, [cNode.PNodes[i].getvector(0)], axis=0)
-                    t2= np.append(t2, [cNode.PNodes[i].getvector(1)], axis=0)
+                    t1=np.append(t1, [cNode.PNodes[i].get_vector()], axis=0)
+                    # t2= np.append(t2, [cNode.PNodes[i].getvector(1)], axis=0)
                 v1=np.mean(t1, axis=0)
-                v2=np.mean(t2, axis=0)
+                # v2=np.mean(t2, axis=0)
                 embeddings_content[RADIUS_MAP*ix+iy]= v1
-                embeddings_style[RADIUS_MAP*ix+iy]= v2
+                # embeddings_style[RADIUS_MAP*ix+iy]= v2
             else:
-                embeddings_content[RADIUS_MAP*ix+iy]= np.zeros((1,3000))
-                embeddings_style[RADIUS_MAP*ix+iy]= np.zeros((1,2))
+                embeddings_content[RADIUS_MAP*ix+iy]= np.zeros((1,768))
+                # embeddings_style[RADIUS_MAP*ix+iy]= np.zeros((1,2))
 
 
 
 
         for i in range(PNodes_arr.shape[0]):
-            embeddings_content[RADIUS_MAP*RADIUS_MAP+i]=PNodes_arr[i].getvector(0)
-            embeddings_style[RADIUS_MAP*RADIUS_MAP+i]=PNodes_arr[i].getvector(1)
+            embeddings_content[RADIUS_MAP*RADIUS_MAP+i]=PNodes_arr[i].get_vector()
+            # embeddings_style[RADIUS_MAP*RADIUS_MAP+i]=PNodes_arr[i].getvector(1)
 
 
 
         embeddings_content=np.array(embeddings_content)
-        embeddings_style=np.array(embeddings_style)
+        # embeddings_style=np.array(embeddings_style)
         # embeddings_content = normalize(embeddings_content)
         # embeddings_style = normalize(embeddings_style)
         features_content = torch.from_numpy(embeddings_content).type(torch.float32)
-        features_style = torch.from_numpy(embeddings_style).type(torch.float32)
+        # features_style = torch.from_numpy(embeddings_style).type(torch.float32)
         # assert edge_type.size(0) == edge_index[0].size(0)
         # adj = sparse_mx_to_torch_sparse_tensor(adj)
         with open('../data_fakenews_test', 'wb') as inp:
-            obj = tuple([features_content, features_style, edge_index, edge_type, labels])
+            obj = tuple([features_content, edge_index, edge_type, labels])
             pickle.dump(obj, inp)
-        return features_content, features_style, edge_index, edge_type, labels
+        return features_content, edge_index, edge_type, labels
     else:
         with open('../data_fakenews_test', 'rb') as inp:
             obj = pickle.load(inp)
-        features_content, features_style, edge_index, edge_type, labels = obj
+        features_content, edge_index, edge_type, labels = obj
         
-        return features_content, features_style, edge_index, edge_type, labels
+        return features_content, edge_index, edge_type, labels
 
 
 def refine_label_order(labels):
