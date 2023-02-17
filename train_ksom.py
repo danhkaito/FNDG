@@ -10,8 +10,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 # import scipy
 # from sklearn.model_selection import train_test_split
 
-METHOD = 'euclid'   # 'euclid' or 'cosin'
-NUM_ITER = 1000
+METHOD = 'cosine'   # 'euclid' or 'cosine'
+NUM_ITER = 10
 
 # Read data
 train_df = pd.read_csv('benchmark_data\\Liar\\train.csv')
