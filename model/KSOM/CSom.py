@@ -44,13 +44,17 @@ class CSom:
         dis = cosine_similarity(np.expand_dims(node1.get_vector(), axis=0), np.expand_dims(node2.get_vector(), axis=0))[0][0]
         return dis
 
-    def FindBestMatchingNode(self, inputPNode):
+    def FindBestMatchingNode(self, inputPNode, method):
         LowestDistance = 999999
+        if method == 'euclid':
+            calc_distance = self.calc_euclid_distance
+        else:
+            calc_distance = self.calc_cosine_distance
         # SecDistance = 999999
         winner = None
         PNode = inputPNode
         for iy, ix in np.ndindex(self.m_Som.shape):
-            dist = self.calc_cosine_distance(self.m_Som[iy, ix], PNode)
+            dist = calc_distance(self.m_Som[iy, ix], PNode)
             if dist < LowestDistance:
                 # if len(self.m_Som[iy, ix].PNodes) > 0:
                 #     totalSim = 0
@@ -84,13 +88,13 @@ class CSom:
     # def CalculateCosine2PNode(self, inputPNode1, inputPNode2):
     #     return PNode.calc_cosine2PNode(inputPNode1, inputPNode2, self.bias)
     
-    def Train(self):
-        print("Start Training")
+    def Train(self, method):
+        print("Start Training " + method)
         
         for i in tqdm(range(self.numIterations)):
             # print(f"Epoch {i}")
             randomPNode = self.PNodes[int(np.random.randint(self.PNodes.shape[0], size=1))]
-            WinningNode, grid_x, grid_y = self.FindBestMatchingNode(randomPNode)
+            WinningNode, grid_x, grid_y = self.FindBestMatchingNode(randomPNode, method)
             dNeighbourhoodRadius = self.dMapRadius * math.exp(-float(i) / self.dTimeConstant)
             WidthSq = dNeighbourhoodRadius * dNeighbourhoodRadius
             for iy, ix in np.ndindex(self.m_Som.shape):
@@ -106,10 +110,10 @@ class CSom:
             #     for iy, ix in np.ndindex(self.m_Som.shape):
             #       f.write(f"{iy} {ix} {self.m_Som[iy,ix]} \n")
 
-    def map_PNode2CNode(self):
+    def map_PNode2CNode(self, method):
         print("Start Mapping")
         for i in tqdm(range(self.PNodes.shape[0])):
-            SuitNode, _, _ = self.FindBestMatchingNode(self.PNodes[i])
+            SuitNode, _, _ = self.FindBestMatchingNode(self.PNodes[i], method)
             # print(self.PNodes[i])
             # print(SuitNode)
             SuitNode.addPNode(self.PNodes[i])
@@ -130,4 +134,3 @@ class CSom:
     
     def save(self, oup):
         pickle.dump(self, oup)
-
