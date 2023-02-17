@@ -6,3 +6,6 @@ class PNode(Node):
         
     def print_corpus(self):
         print(self.corpus)
+    
+    def __str__(self):
+        return "CONTENT: "+self.corpus+"\n"

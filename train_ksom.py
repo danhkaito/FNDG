@@ -1,7 +1,7 @@
 from model.KSOM.PNode import *
 from model.KSOM.CNode import *
 from model.KSOM.CSom import *
-
+import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 # import pickle 
@@ -23,9 +23,9 @@ test_Y = train_df['Label'].values
 
 
 # print(len(data_train))
-
-doc_2_vec = TfidfVectorizer(min_df = 2, max_df = 0.5, ngram_range = (1,1), stop_words = 'english')
-model = CSom(200, train_X, 100000, doc_2_vec)
+doc_2_vec = np.load('./model_save/embeddings.npy')
+# doc_2_vec = TfidfVectorizer(min_df = 2, max_df = 0.5, ngram_range = (1,1), stop_words = 'english')
+model = CSom(30, train_X, 40000, doc_2_vec)
 model.Train()
 # PNodes = TfidfVectorizer()
 # PNodes = PNodes.fit_transform(corpus_val).todense()

@@ -18,9 +18,9 @@ class CSom:
         self.dTimeConstant = numIterations / math.log(self.dMapRadius)
         self.dLearningRate = constStartLearningRate
         self.constLearningRate = constStartLearningRate
-        self.doc_2_vectorizer = doc_2_vectorizer
+        # self.doc_2_vectorizer = doc_2_vectorizer
         print("Start TFIDF")
-        self.PNodes_content_endcode = self.doc_2_vectorizer.fit_transform(self.corpus).todense()
+        self.PNodes_content_endcode = doc_2_vectorizer
         print(self.PNodes_content_endcode.shape)
         # for x, y in np.ndindex(self.PNodes_content_endcode.shape):
         #     if self.PNodes_content_endcode[x,y]>1 or self.PNodes_content_endcode[x,y]<0:

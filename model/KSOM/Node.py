@@ -7,5 +7,3 @@ class Node:
     def get_vector(self):
         return self.vector
 
-    def __str__(self):
-        return np.array2string(self.vector)
