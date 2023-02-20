@@ -35,6 +35,7 @@ true_idx = np.squeeze(np.argwhere(labels == 0))
 X_true_train, X_true_test = train_test_split(true_idx, test_size=1- len(X_fake_train)/len(true_idx), random_state=42)
 X_train=np.concatenate((true_idx,fake_idx), axis=None)
 X_test=np.concatenate((X_true_test,X_fake_test), axis=None)
+X_train=np.concatenate((X_train, X_test), axis=None)
 
 
 print(len(X_fake_train), len(X_true_train))
@@ -55,7 +56,7 @@ test_mask[X_test] = True
 #     train_mask[i] = False
 
 
-model_fakenew = FakeNewsModel(hidden_channels_1=64, hidden_channels_2=16, num_feature_concat=100, num_content_feature=768, num_style_feature=2, num_classes=2)
+model_fakenew = FakeNewsModel(hidden_channels_1=16, hidden_channels_2=16, num_feature_concat=100, num_content_feature=768, num_style_feature=2, num_classes=2)
 print(model_fakenew)
 # Use GPU
 print("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -106,12 +107,12 @@ def test():
 #   train_correct = pred[train_mask] == data.y[data.train_mask]  
 #   # Derive ratio of correct predictions.
 #   train_acc = int(train_correct.sum()) / int(data.train_mask.sum())
-    print_class_acc(out[test_mask], labels[test_mask])
+    print_class_acc(out[train_mask], labels[train_mask])
     # return test_acc
       
 
 losses = []
-for epoch in range(0, 2000):
+for epoch in range(0, 100):
     loss = train()
     losses.append(loss)
     if epoch % 10 == 0:
