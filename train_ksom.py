@@ -26,9 +26,9 @@ test_Y = train_df['Label'].values
 
 
 # print(len(data_train))
-doc_2_vec = np.load('./model_save/embeddings.npy')
+doc_2_vec = np.load('./model_save/embeddings_idf_train.npy')
 # doc_2_vec = TfidfVectorizer(min_df = 2, max_df = 0.5, ngram_range = (1,1), stop_words = 'english')
-model = CSom(25, train_X, train_Y, NUM_ITER, doc_2_vec)
+model = CSom(RADIUS_MAP, train_X, train_Y, NUM_ITER, doc_2_vec)
 model.Train(METHOD)
 # PNodes = TfidfVectorizer()
 # PNodes = PNodes.fit_transform(corpus_val).todense()
@@ -40,7 +40,7 @@ model.Train(METHOD)
 #     SuitNode.addPNode(corpus_val[i], PNodes[i])
 
 print("Saving Model...")
-ksom_Weights=open('./model/KSOM/ksom_model_100k_euclid.ckpt', 'wb')
+ksom_Weights=open('./model/KSOM/ksom_model_100k_euclid_idf.ckpt', 'wb')
 model.save(ksom_Weights)
 print("Finish Saving Model")
 
