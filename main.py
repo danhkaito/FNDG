@@ -20,14 +20,14 @@ from torch_geometric.nn import SAGEConv, GCNConv
 from model.model import *
 
 
-features_content, edge_index, edge_type, labels = data_load.load_data_fakenews(True)
+features_content, edge_index, edge_type, labels = data_load.load_data_fakenews(preload=True)
 print(len(edge_type))
 print(len(edge_type))
 # exit()
 # y = torch.from_numpy(labels).type(torch.long)
 
 print(labels[0])
-
+print(len(labels))
 
 fake_idx = np.squeeze(np.argwhere(labels == 1))
 X_fake_train, X_fake_test = train_test_split(fake_idx, test_size=0.2, random_state=42)
@@ -56,7 +56,7 @@ test_mask[X_test] = True
 #     train_mask[i] = False
 
 
-model_fakenew = FakeNewsModel(hidden_channels_1=16, hidden_channels_2=16, num_feature_concat=100, num_content_feature=768, num_style_feature=2, num_classes=2)
+model_fakenew = FakeNewsModel(hidden_channels_1=128, hidden_channels_2=128, num_feature_concat=100, num_content_feature=3000, num_style_feature=2, num_classes=2)
 print(model_fakenew)
 # Use GPU
 print("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -85,7 +85,10 @@ def train():
       model_fakenew.train()
       optimizer.zero_grad() 
       # Use all data as input, because all nodes have node features
+      print(len(features_content))
       out = model_fakenew(features_content, edge_index, edge_type)  
+      print(len(out))
+      print(len(labels))
       # Only use nodes with labels available for loss calculation --> mask
       loss = criterion(out[train_mask], labels[train_mask])  
       loss.backward() 
@@ -112,7 +115,7 @@ def test():
       
 
 losses = []
-for epoch in range(0, 100):
+for epoch in range(0, 300):
     loss = train()
     losses.append(loss)
     if epoch % 10 == 0:

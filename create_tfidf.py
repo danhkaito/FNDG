@@ -14,15 +14,15 @@ test_Y = train_df['Label'].values
 
 
 
-doc_2_vec = TfidfVectorizer(max_features=4000, ngram_range = (1,1), stop_words = 'english')
+doc_2_vec = TfidfVectorizer(min_df=2, max_df=0.5, ngram_range = (1,1), stop_words = 'english', max_features=3000)
 
-vecs_train_idf = doc_2_vec.fit_transform(train_X).todense().squeeze()
+vecs_train_idf = np.asarray(doc_2_vec.fit_transform(train_X).todense())
 
-vecs_test_idf = doc_2_vec.transform(test_X).todense()
+vecs_test_idf = np.asarray(doc_2_vec.transform(test_X).todense())
 print(vecs_train_idf.shape)
 print(len(vecs_train_idf[0]))
-# np.save('./model_save/embeddings_idf_train.npy', vecs_train_idf)
-# np.save('./model_save/embeddings_idf_test.npy', vecs_test_idf)
+np.save('./model_save/embeddings_idf_train.npy', vecs_train_idf)
+np.save('./model_save/embeddings_idf_test.npy', vecs_test_idf)
 
 
 # print(len(train_X))

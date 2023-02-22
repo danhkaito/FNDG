@@ -26,10 +26,10 @@ model_fakenew= torch.load(path_model)
 features_content, edge_index, edge_type, labels = data_load.load_data_fakenews(True)
 data_test = pd.read_csv('benchmark_data\\Liar\\test.csv')
 
-enc_bert = np.load('./model_save/embeddings_test.npy')
+enc_bert = np.load('./model_save/embeddings_idf_test.npy')
 content = data_test.Statement.values
 labels = data_test.Label.values
-model=load_pickle('./model/KSOM/ksom_model_100k_euclid.ckpt')
+model=load_pickle('./model/KSOM/ksom_model_100k_euclid_idf.ckpt')
 PNodes_arr_test=create_pnode(corpus=content, pre_data=enc_bert,labels=labels)
 # print(data_test.iloc[0])
 TP=0
@@ -51,14 +51,14 @@ for i in range(0, len(data_test)):
     SuitNode, ix, iy = model.FindBestMatchingNode(PNodes_arr_test[i], 'euclid')
     weight_val= model.calc_euclid_distance(PNodes_arr_test[i], SuitNode)
     # SuitNode.addPNode(PNodes_arr[i], i)
-    lst_weight_edge_test.append([RADIUS_MAP*iy+ix, idx_start, weight_val])
-    lst_edge_type.append(1)
+    # lst_weight_edge_test.append([RADIUS_MAP*iy+ix, idx_start, weight_val])
+    # lst_edge_type.append(1)
     for node_idx in model.m_Som[iy, ix].PNodes:
         # print(f"Node {iy}, {ix}\n")
         weight_pnode2pnode=model.calc_cosine_distance(model.m_Som[iy, ix].PNodes[node_idx], PNodes_arr_test[i])
         # print(f"{weight_pnode2pnode}\n")
-        if weight_pnode2pnode < 0.7:
-            continue
+        # if weight_pnode2pnode < 0.7:
+        #     continue
         lst_weight_edge_test.append([node_idx, idx_start, weight_pnode2pnode])
         lst_edge_type.append(2)
 
@@ -77,7 +77,7 @@ for i in range(0, len(data_test)):
     edge_index_test = torch.cat((edge_index, edge_index_test_no_inv,edge_index_test_inv), 1)
     edge_type_test = torch.cat((edge_type, edge_type_addition, edge_type_addition))
 
-    assert len(edge_index_test[0])==len(edge_type_test)
+    assert len(edge_index_test[0])==len(edge_type_test) 
 
     features_content_test= torch.cat((features_content_test, torch.from_numpy(np.array([PNodes_arr_test[i].get_vector()])).type(torch.float32)))
     # features_style_test= torch.cat((features_style_test, torch.from_numpy(np.array([PNodes_arr_test[i].getvector(1)])).type(torch.float32)))

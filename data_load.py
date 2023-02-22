@@ -11,7 +11,7 @@ import pickle
 import pandas as pd
 IMBALANCE_THRESH = 101
 RADIUS_MAP = 25
-
+EMBED_DIM = 3000
 
 def build_graph_ksom(model, ):
     graph= nx.Graph()
@@ -36,7 +36,7 @@ def build_graph_ksom(model, ):
                         # print("Go here")
                         weights=model.calc_euclid_distance(model.m_Som[ix, iy], model.m_Som[x_idx, y_idx])
                         # print("W" + str(weights))
-                        print("DBG "+str((idx_cnode, idx_cnode_neighbor)))
+                        # print("DBG "+str((idx_cnode, idx_cnode_neighbor)))
                         edge_weighted_list.append([idx_cnode, idx_cnode_neighbor, 1.0])
                         edge_type_list[(idx_cnode, idx_cnode_neighbor)]=0
                         edge_dict[(idx_cnode, idx_cnode_neighbor)]=1
@@ -54,14 +54,14 @@ def build_leaf_node_ksom(model, PNodes_arr, lst_weight_edge, lst_edge_type):
         weight_val= model.calc_euclid_distance(PNodes_arr[i], SuitNode)
         # SuitNode.addPNode(PNodes_arr[i], i)
         sum_quan_err+=weight_val
-        lst_weight_edge.append([RADIUS_MAP*iy+ix, idx_start, 1.0])
-        lst_edge_type[(RADIUS_MAP*iy+ix, idx_start)]=1
+        # lst_weight_edge.append([RADIUS_MAP*iy+ix, idx_start, 1.0])
+        # lst_edge_type[(RADIUS_MAP*iy+ix, idx_start)]=1
         for node_idx in model.m_Som[iy, ix].PNodes:
             # print(f"Node {iy}, {ix}\n")
             weight_pnode2pnode=model.calc_cosine_distance(model.m_Som[iy, ix].PNodes[node_idx], PNodes_arr[i])
             # print(f"{weight_pnode2pnode}\n")
-            if weight_pnode2pnode < 0.7:
-                continue
+            # if weight_pnode2pnode < 0.7:
+            #     continue
             lst_weight_edge.append([node_idx, idx_start, 1.0])
             lst_edge_type[(node_idx, idx_start)]=2
         SuitNode.addPNode(PNodes_arr[i], idx_start)
@@ -73,7 +73,7 @@ def build_leaf_node_ksom(model, PNodes_arr, lst_weight_edge, lst_edge_type):
 def load_data_fakenews(preload):
 
     if preload == False:
-        model_ksom= utils.load_pickle('./model/KSOM/ksom_model_100k_euclid.ckpt')
+        model_ksom= utils.load_pickle('./model/KSOM/ksom_model_100k_euclid_idf.ckpt')
         # processed_data= utils.load_pickle('../dataset/data_preprocess_imbalance_train')
         PNodes_arr = np.copy(model_ksom.PNodes)
         G, pos, edge_list, edge_type_lst=build_graph_ksom(model_ksom)
@@ -132,7 +132,10 @@ def load_data_fakenews(preload):
 
         for i in range(0, len(PNodes_arr)):
             labels_node[RADIUS_MAP*RADIUS_MAP+i]=float(PNodes_arr[i].label==False)
+
         values=[labels_node.get(val, 5.0) for val in G.nodes()]
+
+        print(len(G.No))
 
         labels=np.array(values).astype(np.int64)
 
@@ -142,7 +145,7 @@ def load_data_fakenews(preload):
         utils.print_edges_num(adj.todense(), labels)
 
         
-        embeddings_content = np.empty((RADIUS_MAP*RADIUS_MAP+len(PNodes_arr), 768))
+        embeddings_content = np.empty((RADIUS_MAP*RADIUS_MAP+len(PNodes_arr), EMBED_DIM))
         # embeddings_style = np.empty((RADIUS_MAP*RADIUS_MAP+len(processed_data), 2))
     # for ix, iy in np.ndindex(model.m_Som.shape):
     #     temp=tuple()
@@ -152,7 +155,7 @@ def load_data_fakenews(preload):
 
         for iy, ix in np.ndindex(model_ksom.m_Som.shape):
             cNode = model_ksom.m_Som[iy, ix]
-            t1=np.empty((0,768))
+            t1=np.empty((0,EMBED_DIM))
             # t2=np.empty((0,2))
             if len(cNode.PNodes)>0:
                 for i in cNode.PNodes.keys():
@@ -163,7 +166,7 @@ def load_data_fakenews(preload):
                 embeddings_content[RADIUS_MAP*ix+iy]= v1
                 # embeddings_style[RADIUS_MAP*ix+iy]= v2
             else:
-                embeddings_content[RADIUS_MAP*ix+iy]= np.zeros((1,768))
+                embeddings_content[RADIUS_MAP*ix+iy]= np.zeros((1,EMBED_DIM))
                 # embeddings_style[RADIUS_MAP*ix+iy]= np.zeros((1,2))
 
 

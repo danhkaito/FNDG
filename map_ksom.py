@@ -3,7 +3,7 @@ import os
 from utils import *
 import numpy as np
 
-model=load_pickle('./model/KSOM/ksom_model_100k_euclid.ckpt')
+model=load_pickle('./model/KSOM/ksom_model_100k_euclid_idf.ckpt')
 
 model.map_PNode2CNode('euclid')
 # for iy, ix in np.ndindex(model.m_Som.shape):
