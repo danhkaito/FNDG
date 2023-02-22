@@ -3,9 +3,10 @@ import os
 from utils import *
 import numpy as np
 
+METHOD = 'euclid'
 model=load_pickle('./model/KSOM/ksom_model_100k_euclid_idf.ckpt')
+model.map_PNode2CNode(METHOD)
 
-model.map_PNode2CNode('euclid')
 # for iy, ix in np.ndindex(model.m_Som.shape):
 #     for i in range(len(model.m_Som[iy,ix].PNodes)):
 #         print(iy," ",ix," ",model.m_Som[iy,ix].PNodes[i].corpus)

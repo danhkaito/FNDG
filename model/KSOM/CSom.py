@@ -53,8 +53,8 @@ class CSom:
         # SecDistance = 999999
         winner = None
         PNode = inputPNode
-        for iy, ix in np.ndindex(self.m_Som.shape):
-            dist = calc_distance(self.m_Som[iy, ix], PNode)
+        for ix, iy in np.ndindex(self.m_Som.shape):
+            dist = calc_distance(self.m_Som[ix, iy], PNode)
             if dist < LowestDistance:
                 # if len(self.m_Som[iy, ix].PNodes) > 0:
                 #     totalSim = 0
@@ -63,7 +63,7 @@ class CSom:
                 #     if totalSim / len(self.m_Som[iy, ix].PNodes) < 0.5:
                 #         continue
                 LowestDistance = dist
-                winner = self.m_Som[iy, ix]
+                winner = self.m_Som[ix, iy]
                 win_x=ix
                 win_y=iy
         return winner, win_x, win_y
@@ -97,12 +97,12 @@ class CSom:
             WinningNode, grid_x, grid_y = self.FindBestMatchingNode(randomPNode, method)
             dNeighbourhoodRadius = self.dMapRadius * math.exp(-float(i) / self.dTimeConstant)
             WidthSq = dNeighbourhoodRadius * dNeighbourhoodRadius
-            for iy, ix in np.ndindex(self.m_Som.shape):
-                DistToNodeSq = (iy-grid_y)*(iy-grid_y)+(ix-grid_x)*(ix-grid_x)
+            for ix, iy in np.ndindex(self.m_Som.shape):
+                DistToNodeSq = (ix-grid_x)*(ix-grid_x)+(iy-grid_y)*(iy-grid_y)
 
                 if True:
                     self.dInfluence = math.exp(-(DistToNodeSq) / (2 * WidthSq))
-                    self.m_Som[iy, ix].AdjustWeights(randomPNode,
+                    self.m_Som[ix, iy].AdjustWeights(randomPNode,
                                                      self.dLearningRate, self.dInfluence)
             self.dLearningRate = self.constLearningRate * math.exp(-float(i) / (self.dTimeConstant))
             # if i%5==0:
@@ -116,7 +116,7 @@ class CSom:
             SuitNode, _, _ = self.FindBestMatchingNode(self.PNodes[i], method)
             # print(self.PNodes[i])
             # print(SuitNode)
-            SuitNode.addPNode(self.PNodes[i], i)
+            SuitNode.addPNode(self.PNodes[i], self.MapSize*self.MapSize+i)
         print('Done Mapping')
 
     # def Plot(self):
