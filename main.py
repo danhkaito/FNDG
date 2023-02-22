@@ -20,18 +20,11 @@ from torch_geometric.nn import SAGEConv, GCNConv
 from model.model import *
 
 
-features_content, edge_index, edge_type, labels = data_load.load_data_fakenews(preload=True)
-print(len(edge_type))
-print(len(edge_type))
-# exit()
-# y = torch.from_numpy(labels).type(torch.long)
+data = data_load.load_data_fakenews_training(preload=True)
 
-print(labels[0])
-print(len(labels))
-
-fake_idx = np.squeeze(np.argwhere(labels == 1))
+fake_idx = np.squeeze(np.argwhere(data.y == 1))
 X_fake_train, X_fake_test = train_test_split(fake_idx, test_size=0.2, random_state=42)
-true_idx = np.squeeze(np.argwhere(labels == 0))
+true_idx = np.squeeze(np.argwhere(data.y == 0))
 X_true_train, X_true_test = train_test_split(true_idx, test_size=1- len(X_fake_train)/len(true_idx), random_state=42)
 X_train=np.concatenate((true_idx,fake_idx), axis=None)
 X_test=np.concatenate((X_true_test,X_fake_test), axis=None)
@@ -44,8 +37,8 @@ print(len(X_fake_train), len(X_true_train))
 # exit()
 ############# Train mask ############
 # Mask all the ksom node
-train_mask = torch.zeros(len(features_content), dtype=torch.bool)
-test_mask = torch.zeros(len(features_content), dtype=torch.bool)
+train_mask = torch.zeros(len(data.x), dtype=torch.bool)
+test_mask = torch.zeros(len(data.x), dtype=torch.bool)
 train_mask[X_train] = True
 test_mask[X_test] = True
 # for x in range(0, 15*15):
@@ -56,17 +49,15 @@ test_mask[X_test] = True
 #     train_mask[i] = False
 
 
-model_fakenew = FakeNewsModel(hidden_channels_1=128, hidden_channels_2=128, num_feature_concat=100, num_content_feature=3000, num_style_feature=2, num_classes=2)
+model_fakenew = FakeNewsModel(hidden_channels_1=16, hidden_channels_2=16, num_feature_concat=100, num_content_feature=768, num_style_feature=2, num_classes=2)
 print(model_fakenew)
 # Use GPU
 print("cuda:0" if torch.cuda.is_available() else "cpu")
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-features_content = features_content.to(device)
+# features_content = features_content.to(device)
 # features_style = features_style.to(device)
-edge_index = edge_index.to(device)
-edge_type = edge_type.to(device)
-labels = labels.to(device)
-# train_mask = train_mask.to(device)
+data = data.to(device)
+train_mask = train_mask.to(device)
 model_fakenew = model_fakenew.to(device)
 
 # Initialize Optimizer
@@ -85,41 +76,40 @@ def train():
       model_fakenew.train()
       optimizer.zero_grad() 
       # Use all data as input, because all nodes have node features
-      print(len(features_content))
-      out = model_fakenew(features_content, edge_index, edge_type)  
-      print(len(out))
-      print(len(labels))
+      out = model_fakenew(data.x, data.edge_index, data.edge_type) 
+      print_class_acc(out[train_mask], data.y[train_mask])
+ 
       # Only use nodes with labels available for loss calculation --> mask
-      loss = criterion(out[train_mask], labels[train_mask])  
+      loss = criterion(out[train_mask], data.y[train_mask])  
       loss.backward() 
       optimizer.step()
       return loss
 
 
-@torch.no_grad()
-def test():
-    model_fakenew.eval()
-    out = model_fakenew(features_content, edge_index, edge_type)
-    # Use the class with highest probability.
-    pred = out.argmax(dim=1)
-    # Check against ground-truth labels.
+# @torch.no_grad()
+# def test():
+#     model_fakenew.eval()
+#     out = model_fakenew(features_content, edge_index, edge_type)
+#     # Use the class with highest probability.
+#     pred = out.argmax(dim=1)
+#     # Check against ground-truth labels.
 
-    # test_correct = pred[train_mask] == labels[train_mask]
-    # # Derive ratio of correct predictions.
-    # test_acc = int(test_correct.sum()) / int(train_mask.sum())  
-#   train_correct = pred[train_mask] == data.y[data.train_mask]  
-#   # Derive ratio of correct predictions.
-#   train_acc = int(train_correct.sum()) / int(data.train_mask.sum())
-    print_class_acc(out[train_mask], labels[train_mask])
-    # return test_acc
+#     # test_correct = pred[train_mask] == labels[train_mask]
+#     # # Derive ratio of correct predictions.
+#     # test_acc = int(test_correct.sum()) / int(train_mask.sum())  
+# #   train_correct = pred[train_mask] == data.y[data.train_mask]  
+# #   # Derive ratio of correct predictions.
+# #   train_acc = int(train_correct.sum()) / int(data.train_mask.sum())
+#     print_class_acc(out[train_mask], labels[train_mask])
+#     # return test_acc
       
 
 losses = []
-for epoch in range(0, 300):
+for epoch in range(0, 1000):
     loss = train()
     losses.append(loss)
     if epoch % 10 == 0:
         print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
-        test()
+        # test()
 
 torch.save(model_fakenew, './model/model_fakenew.pt')

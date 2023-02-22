@@ -3,12 +3,17 @@ import scipy.sparse as sp
 import numpy as np
 import torch
 import ipdb
-from scipy.io import loadmat
 import utils
-from collections import defaultdict
-import networkx as nx
 import pickle
 import pandas as pd
+
+import networkx as nx
+import matplotlib.pyplot as plt
+import networkx as nx
+from torch_geometric.utils.convert import to_networkx, from_networkx
+
+
+
 IMBALANCE_THRESH = 101
 RADIUS_MAP = 25
 EMBED_DIM = 3000
@@ -70,94 +75,31 @@ def build_leaf_node_ksom(model, PNodes_arr, lst_weight_edge, lst_edge_type):
     return lst_weight_edge, lst_edge_type
 
 
-def load_data_fakenews(preload):
+def load_data_fakenews_training(preload):
 
     if preload == False:
         model_ksom= utils.load_pickle('./model/KSOM/ksom_model_100k_euclid_idf.ckpt')
-        # processed_data= utils.load_pickle('../dataset/data_preprocess_imbalance_train')
         PNodes_arr = np.copy(model_ksom.PNodes)
-        G, pos, edge_list, edge_type_lst=build_graph_ksom(model_ksom)
-        print(len(edge_list))
-        edge_list, edge_type_lst=build_leaf_node_ksom(model_ksom, PNodes_arr , edge_list, edge_type_lst)
-        print(len(edge_list))
-        # print(len(edge_type))
-        
-        G.add_weighted_edges_from(edge_list)
-        # adj = nx.to_scipy_sparse_array(G)
 
+        RADIUS_MAP = model_ksom.MapSize
+        EMBED_DIM = 768
 
-        # adj = nx.to_scipy_sparse_array(G).tocoo()
-        # row = torch.from_numpy(adj.row.astype(np.int64)).to(torch.long)
-        # col = torch.from_numpy(adj.col.astype(np.int64)).to(torch.long)
+        node_list = []
 
-        # print(len(edge_type_lst))
-        # print(edge_type_lst)
-        # edge_index = torch.stack([row, col], dim=0)
-        adj = np.empty((len(edge_list)*2, 2))
-        i = 0
-        print(len(G.edges))
-        # exit()
-        for x in G.edges:
-            # print(x)
-            adj[i] = np.array(x)
-            adj[i+1] = np.array((x[1], x[0]))
-
-            i+=2
-        
-        print(adj)
-        edge_index = torch.from_numpy(adj).to(torch.long)
-        edge_index = torch.transpose(edge_index, 0, 1)
-        print(edge_index)
-        edge_type = []
-        print(len(edge_index[0]))
-        for i in range(len(edge_index[0])):
-            a = (edge_index[0][i]).item()
-            b = (edge_index[1][i]).item()
-            # print((a,b))
-            if (a,b) in edge_type_lst:
-                edge_type.append(edge_type_lst[(a,b)])
-                # print("Helllo")
-            elif (b,a) in edge_type_lst:
-                edge_type.append(edge_type_lst[(b,a)])
-            else:
-                print(a,b)
-                exit()
-
-        edge_type = torch.from_numpy(np.array(edge_type))
-        adj = nx.to_scipy_sparse_array(G)
-        labels_node={}
-
-        for i in range(0, RADIUS_MAP*RADIUS_MAP):
-            labels_node[i]=2.0
-
-        for i in range(0, len(PNodes_arr)):
-            labels_node[RADIUS_MAP*RADIUS_MAP+i]=float(PNodes_arr[i].label==False)
-
-        values=[labels_node.get(val, 5.0) for val in G.nodes()]
-
-        print(len(G.No))
-
-        labels=np.array(values).astype(np.int64)
-
-
-        labels = torch.LongTensor(labels)
-
-        utils.print_edges_num(adj.todense(), labels)
-
-        
         embeddings_content = np.empty((RADIUS_MAP*RADIUS_MAP+len(PNodes_arr), EMBED_DIM))
         # embeddings_style = np.empty((RADIUS_MAP*RADIUS_MAP+len(processed_data), 2))
-    # for ix, iy in np.ndindex(model.m_Som.shape):
-    #     temp=tuple()
-    #     for w in model.m_Som[ix, iy].dWeights:
-    #         temp+=(w,)
-    #         embeddings[16*ix+iy]= np.concatenate(temp, axis=None)
+        # for ix, iy in np.ndindex(model.m_Som.shape):
+        #     temp=tuple()
+        #     for w in model.m_Som[ix, iy].dWeights:
+        #         temp+=(w,)
+        #         embeddings[16*ix+iy]= np.concatenate(temp, axis=None)
 
-        for iy, ix in np.ndindex(model_ksom.m_Som.shape):
-            cNode = model_ksom.m_Som[iy, ix]
+        for ix, iy in np.ndindex(model_ksom.m_Som.shape):
+            cNode = model_ksom.m_Som[ix, iy]
             t1=np.empty((0,EMBED_DIM))
             # t2=np.empty((0,2))
             if len(cNode.PNodes)>0:
+                # print("Go here")
                 for i in cNode.PNodes.keys():
                     t1=np.append(t1, [cNode.PNodes[i].get_vector()], axis=0)
                     # t2= np.append(t2, [cNode.PNodes[i].getvector(1)], axis=0)
@@ -169,33 +111,47 @@ def load_data_fakenews(preload):
                 embeddings_content[RADIUS_MAP*ix+iy]= np.zeros((1,EMBED_DIM))
                 # embeddings_style[RADIUS_MAP*ix+iy]= np.zeros((1,2))
 
-
-
-
         for i in range(PNodes_arr.shape[0]):
             embeddings_content[RADIUS_MAP*RADIUS_MAP+i]=PNodes_arr[i].get_vector()
             # embeddings_style[RADIUS_MAP*RADIUS_MAP+i]=PNodes_arr[i].getvector(1)
-
-
 
         embeddings_content=np.array(embeddings_content)
         # embeddings_style=np.array(embeddings_style)
         # embeddings_content = normalize(embeddings_content)
         # embeddings_style = normalize(embeddings_style)
         features_content = torch.from_numpy(embeddings_content).type(torch.float32)
-        # features_style = torch.from_numpy(embeddings_style).type(torch.float32)
-        # assert edge_type.size(0) == edge_index[0].size(0)
-        # adj = sparse_mx_to_torch_sparse_tensor(adj)
-        with open('../data_fakenews_test', 'wb') as inp:
-            obj = tuple([features_content, edge_index, edge_type, labels])
-            pickle.dump(obj, inp)
-        return features_content, edge_index, edge_type, labels
-    else:
-        with open('../data_fakenews_test', 'rb') as inp:
-            obj = pickle.load(inp)
-        features_content, edge_index, edge_type, labels = obj
+
         
-        return features_content, edge_index, edge_type, labels
+            
+        for i in range (0, RADIUS_MAP*RADIUS_MAP):
+            node_list.append((i, {'x': features_content[i], 'y': 2}))
+        for i in range (0, len(PNodes_arr)):
+            idx = RADIUS_MAP*RADIUS_MAP+i
+            node_list.append((idx, {'x': features_content[idx],'y': int(PNodes_arr[i].label==True)}))
+
+
+        edge_list = []
+        for ix, iy in np.ndindex(model_ksom.m_Som.shape):
+            cNode = model_ksom.m_Som[ix, iy]
+            edge_list = edge_list + cNode.create_edge_subgraph(model_ksom)
+
+        G = nx.Graph()
+
+        G.add_nodes_from(node_list)
+        G.add_edges_from(edge_list)
+
+        pyg = from_networkx(G)
+
+        edge_inv = torch.cat((pyg.edge_index[1].view(1,-1), pyg.edge_index[0].view(1,-1)), dim =0)
+        pyg.edge_index =  torch.cat((pyg.edge_index, edge_inv), 1)
+        pyg.edge_weight = torch.cat((pyg.edge_weight,pyg.edge_weight))
+        pyg.edge_type = torch.cat((pyg.edge_type, pyg.edge_type))
+
+        torch.save(pyg, './data/Fake_or_Real_training.pt')
+        return pyg
+    else:
+        pyg = torch.load('./data/Fake_or_Real_training.pt')
+        return pyg
 
 
 def refine_label_order(labels):

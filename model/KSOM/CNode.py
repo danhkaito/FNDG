@@ -26,14 +26,14 @@ class CNode(Node):
                     continue
                 else:
                     if method == 'cosine':
-                        calc_distance = model_ksom.calc_consine_distance
+                        calc_distance = model_ksom.calc_cosine_distance
                     else:
                         calc_distance = model_ksom.calc_euclid_distance
                     dist_2node = calc_distance(self.PNodes[node_idx], self.PNodes[node_idx_neighbor])
                     if dist_2node < 0.7:
                         continue
                     else:
-                        edge_list.append((node_idx, node_idx_neighbor, {'weight': dist_2node, 'edge_type': 1}))
+                        edge_list.append((node_idx, node_idx_neighbor, {'edge_weight': dist_2node, 'edge_type': 1}))
         return edge_list
 
     def __str__(self):
