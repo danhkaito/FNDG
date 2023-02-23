@@ -11,8 +11,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 # from sklearn.model_selection import train_test_split
 
 METHOD = 'euclid'   # 'euclid' or 'cosin'
-NUM_ITER = 50000
-RADIUS_MAP = 20
+NUM_ITER = 100000
+RADIUS_MAP = 25
 # Read data
 # train_df = pd.read_csv('benchmark_data\\Liar\\train.csv')
 # test_df = pd.read_csv('benchmark_data\\Liar\\test.csv')
@@ -23,17 +23,17 @@ RADIUS_MAP = 20
 # test_X = train_df['Statement'].values
 # test_Y = train_df['Label'].values
 
-train_X = np.load('./model_save/Fake_or_Real/data numpy/train_sentence.npy', allow_pickle=True)
-train_Y = np.array(np.load('./model_save/Fake_or_Real/data numpy/train_label.npy', allow_pickle=True))
-convert_label = lambda t: (t == 'FAKE').astype(int)
+train_X = np.load('./model_save/Liar/data numpy/train_sentence.npy', allow_pickle=True)
+train_Y = np.array(np.load('./model_save/Liar/data numpy/train_label.npy', allow_pickle=True))
+print(train_Y)
+convert_label = lambda t: (t == False).astype(int)
 train_Y = convert_label(train_Y)
 
 # print(len(data_train))
-doc_2_vec = np.load('./model_save/Fake_or_Real/data numpy/train_embed.npy')
+doc_2_vec = np.load('./model_save/Liar/data numpy/train_embed.npy')
 # doc_2_vec = TfidfVectorizer(min_df = 2, max_df = 0.5, ngram_range = (1,1), stop_words = 'english')
 model = CSom(RADIUS_MAP, train_X, train_Y, NUM_ITER, doc_2_vec)
 model.Train(METHOD)
-model.map_PNode2CNode(METHOD)
 
 # PNodes = TfidfVectorizer()
 # PNodes = PNodes.fit_transform(corpus_val).todense()
@@ -45,7 +45,7 @@ model.map_PNode2CNode(METHOD)
 #     SuitNode.addPNode(corpus_val[i], PNodes[i])
 
 print("Saving Model...")
-ksom_Weights=open('./model/KSOM/ksom_model_100k_euclid_idf.ckpt', 'wb')
+ksom_Weights=open('./model/KSOM/ksom_model_100k_euclid_liar_bert.ckpt', 'wb')
 model.save(ksom_Weights)
 print("Finish Saving Model")
 

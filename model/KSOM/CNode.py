@@ -36,6 +36,25 @@ class CNode(Node):
                         edge_list.append((node_idx, node_idx_neighbor, {'edge_weight': dist_2node, 'edge_type': 1}))
         return edge_list
 
+    def create_edge_from(self, model_ksom, method = 'cosine'):
+        edge_list = []
+        for node_idx in self.PNodes:
+            for node_idx_neighbor in self.PNodes:
+                if node_idx_neighbor==node_idx:
+                    continue
+                else:
+                    if method == 'cosine':
+                        calc_distance = model_ksom.calc_cosine_distance
+                    else:
+                        calc_distance = model_ksom.calc_euclid_distance
+                    dist_2node = calc_distance(self.PNodes[node_idx], self.PNodes[node_idx_neighbor])
+                    if dist_2node < 0.7:
+                        continue
+                    else:
+                        edge_list.append((node_idx, node_idx_neighbor, {'edge_weight': dist_2node, 'edge_type': 1}))
+        return edge_list
+
+
     def __str__(self):
         true_label = 0
         false_label = 0

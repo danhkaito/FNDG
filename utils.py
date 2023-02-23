@@ -213,7 +213,7 @@ def print_class_acc(output, labels, pre='valid'):
         precision_scr = precision_score(labels.detach().cpu(), torch.argmax(output, dim=-1).detach().cpu())
         recall_scr = recall_score(labels.detach().cpu(), torch.argmax(output, dim=-1).detach().cpu())
 
-    macro_F = f1_score(labels.detach().cpu(), torch.argmax(output, dim=-1).detach().cpu(), average='macro')
+    macro_F = f1_score(labels.detach().cpu(), torch.argmax(output, dim=-1).detach().cpu())
     print(str(pre)+' current auc-roc score: {:f}\n current macro_F score: {:f}\n current precision: {:f}\n current recall: {:f}'.format(auc_score,macro_F,precision_scr,recall_scr))
 
     return

@@ -110,14 +110,32 @@ class CSom:
             #     for iy, ix in np.ndindex(self.m_Som.shape):
             #       f.write(f"{iy} {ix} {self.m_Som[iy,ix]} \n")
 
-    def map_PNode2CNode(self, method):
-        print("Start Mapping")
+    def map_PNode2CNode_training(self, method):
+        self.reset_mapping()
+        print("Start Mapping Training")
         for i in tqdm(range(self.PNodes.shape[0])):
             SuitNode, _, _ = self.FindBestMatchingNode(self.PNodes[i], method)
             # print(self.PNodes[i])
             # print(SuitNode)
             SuitNode.addPNode(self.PNodes[i], self.MapSize*self.MapSize+i)
-        print('Done Mapping')
+        print('Done Mapping Training')
+
+    def map_PNode2CNode_testing(self, method, lst_PNode):
+        print("Start Mapping Whole Graph")
+        self.map_PNode2CNode_training(method)
+        for i in tqdm(range(lst_PNode.shape[0])):
+            SuitNode, _, _ = self.FindBestMatchingNode(lst_PNode[i], method)
+            # print(self.PNodes[i])
+            # print(SuitNode)
+            SuitNode.addPNode(lst_PNode[i], self.MapSize*self.MapSize+self.PNodes.shape[0]+i)
+        print("Done mapping Whole Graph")
+
+    
+    def reset_mapping(self):
+        print("Start Reset mapping")
+        for ix, iy in np.ndindex(self.m_Som.shape):
+            self.m_Som[ix, iy].PNodes ={}
+        print("Done Reset Mapping")
 
     # def Plot(self):
     #     plt.rcParams["figure.autolayout"] = True
