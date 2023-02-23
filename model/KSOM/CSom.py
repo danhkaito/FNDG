@@ -11,9 +11,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 # from matplotlib import pyplot as plt
 
 class CSom:
-    def __init__(self, MapSize, train_X, train_Y, numIterations, doc_2_vectorizer, constStartLearningRate=0.5):
+    def __init__(self, MapSize, train_X, train_Y, corpus, numIterations, constStartLearningRate=0.5):
         self.MapSize = MapSize
-        self.corpus = train_X
+        self.corpus = corpus
         self.labels = train_Y
         self.numIterations = numIterations
         self.dMapRadius = MapSize / 2
@@ -22,7 +22,7 @@ class CSom:
         self.constLearningRate = constStartLearningRate
         # self.doc_2_vectorizer = doc_2_vectorizer
         print("Start TFIDF")
-        self.PNodes_content_endcode = doc_2_vectorizer
+        self.PNodes_content_endcode = train_X
         print(self.PNodes_content_endcode.shape)
         # for x, y in np.ndindex(self.PNodes_content_endcode.shape):
         #     if self.PNodes_content_endcode[x,y]>1 or self.PNodes_content_endcode[x,y]<0:
@@ -42,7 +42,7 @@ class CSom:
 
     def calc_cosine_distance(self, node1, node2):
         dis = cosine_similarity(np.expand_dims(node1.get_vector(), axis=0), np.expand_dims(node2.get_vector(), axis=0))[0][0]
-        return dis
+        return (1 - dis)/2
 
     def FindBestMatchingNode(self, inputPNode, method):
         LowestDistance = 999999
