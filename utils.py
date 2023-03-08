@@ -48,19 +48,8 @@ def get_parser():
     parser.add_argument('--num_class', type=int, default=2)
     parser.add_argument('--name_model', type=str, default='bert-base-cased')
     parser.add_argument('--method_ksom', type=str, default='euclid')
-
-    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
-    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
-    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
-    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
-    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
-    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
-    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
-
     parser.add_argument('--batch_size', type=int, default=16, help='number of size per batch')
-
-    # parser.add_argument('--batch_nums', type=int, default=6000, help='number of batches per epoch')
-    # parser.add_argument('--size', type=int, default=100)
+    parser.add_argument('--preload', type=bool, default=False, help='Preload data')
 
     parser.add_argument('--epoch', type=int, default=5,
                 help='Number of epochs to train.')
@@ -231,10 +220,10 @@ def print_class_acc(output, labels, pre='valid'):
         precision_scr = precision_score(labels.detach().cpu(), torch.argmax(output, dim=-1).detach().cpu())
         recall_scr = recall_score(labels.detach().cpu(), torch.argmax(output, dim=-1).detach().cpu())
 
-    macro_F = f1_score(labels.detach().cpu(), torch.argmax(output, dim=-1).detach().cpu())
-    print(str(pre)+' current auc-roc score: {:f}\n current macro_F score: {:f}\n current precision: {:f}\n current recall: {:f}'.format(auc_score,macro_F,precision_scr,recall_scr))
+    F1_score = f1_score(labels.detach().cpu(), torch.argmax(output, dim=-1).detach().cpu())
+    print(str(pre)+' current auc-roc score: {:f}\n current F1_score score: {:f}\n current precision: {:f}\n current recall: {:f}'.format(auc_score,F1_score,precision_scr,recall_scr))
 
-    return
+    return auc_score, precision_scr, recall_scr, F1_score
 
 def src_upsample(adj,features,labels,idx_train, portion=1.0, im_class_num=3):
     c_largest = labels.max().item()

@@ -10,6 +10,10 @@ from utils import *
 import random
 import pandas as pd
 from torch_geometric.data import InMemoryDataset, Data
+from torch_geometric.loader import NeighborSampler, ClusterLoader, ClusterData, NeighborLoader
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_recall_fscore_support
+
 from sklearn.model_selection import train_test_split
 import torch_geometric.transforms as T
 import data_load
@@ -18,11 +22,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import SAGEConv, GCNConv
 from model.model import *
+import utils
 
 
-data = data_load.load_data_fakenews_training(preload=True, dataset = 'Fake_or_Real')
+parser = utils.get_parser()
 
-data_test = data_load.load_data_fakenews_testing(preload=True, dataset= 'Fake_or_Real')
+args = parser.parse_args()
+
+data = data_load.load_data_fakenews_training(args)
+
+data_test = data_load.load_data_fakenews_testing(args)
 print(data)
 print(data_test)
 # fake_idx = np.squeeze(np.argwhere(data.y == 1))
@@ -50,7 +59,21 @@ print(data_test)
 
 # for i in range (0, 15*15):
 #     train_mask[i] = False
+train_loader = NeighborLoader(
+    data,
+    num_neighbors=[10, 5],
+    batch_size=32,
+    input_nodes=data.train_mask,
+)
 
+subgraph_loader = NeighborLoader(
+    data_test,
+    num_neighbors=[10, 5],
+    batch_size=32,
+    input_nodes=data_test.test_mask,
+)
+# for i, subgraph in enumerate(train_loader):
+#     print(f'Subgraph {i}: {subgraph}')
 
 model_fakenew = FakeNewsModel(hidden_channels_1=16, hidden_channels_2=16, num_feature_concat=100, num_content_feature=768, num_style_feature=2, num_classes=2)
 # model_fakenew = GIN(16)
@@ -60,11 +83,9 @@ print("cuda:0" if torch.cuda.is_available() else "cpu")
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # features_content = features_content.to(device)
 # features_style = features_style.to(device)
-data = data.to(device)
 model_fakenew = model_fakenew.to(device)
-data_test = data_test.to(device)
 # Initialize Optimizer
-learning_rate = 0.001
+learning_rate = args.lr
 decay = 5e-4
 optimizer = torch.optim.Adam(model_fakenew.parameters(), 
                              lr=learning_rate, 
@@ -76,39 +97,55 @@ optimizer = torch.optim.Adam(model_fakenew.parameters(),
 criterion = torch.nn.CrossEntropyLoss()
 
 def train():
-      model_fakenew.train()
-      optimizer.zero_grad() 
-      # Use all data as input, because all nodes have node features
-      out = model_fakenew(data.x, data.edge_index) 
+    train_loss = 0
+    for batch in tqdm(train_loader):
+        model_fakenew.train()
+        optimizer.zero_grad() 
+        # Use all data as input, because all nodes have node features
+        batch = batch.to(device)
+        out = model_fakenew(batch.x, batch.edge_index) 
     #   print_class_acc(out[data.train_mask], data.y[data.train_mask])
- 
-      # Only use nodes with labels available for loss calculation --> mask
-      loss = criterion(out[data.train_mask], data.y[data.train_mask])  
-      loss.backward() 
-      optimizer.step()
-      return loss
+
+        # Only use nodes with labels available for loss calculation --> mask
+        loss = criterion(out[batch.train_mask], batch.y[batch.train_mask])  
+        loss.backward()
+        optimizer.step()
+        train_loss += loss
+
+    return train_loss/len(train_loader)
 
 
 @torch.no_grad()
 def test():
+    predictions = []
+    true_labels = []
     model_fakenew.eval()
-    out = model_fakenew(data_test.x, data_test.edge_index)
-    # Use the class with highest probability.
-    # pred = out.argmax(dim=1)
-    # Check against ground-truth labels.
+    for batch in subgraph_loader:
+        batch = batch.to(device)
+        out = model_fakenew(batch.x, batch.edge_index)
 
-    # test_correct = pred[train_mask] == labels[train_mask]
-    # # Derive ratio of correct predictions.
-    # test_acc = int(test_correct.sum()) / int(train_mask.sum())  
-#   train_correct = pred[train_mask] == data.y[data.train_mask]  
-#   # Derive ratio of correct predictions.
-#   train_acc = int(train_correct.sum()) / int(data.train_mask.sum())
-    print_class_acc(out[data_test.test_mask], data_test.y[data_test.test_mask])
+        output = out[batch.test_mask]
+        b_labels = batch.y[batch.test_mask]
+        output = output.detach().cpu().numpy()
+        label_ids = b_labels.to('cpu').numpy()
+        
+        # Store predictions and true labels
+        predictions.append(np.argmax(output, axis=1).flatten())
+        true_labels.append(label_ids.flatten())
+
+    print('DONE.')
+    pred_labels = (np.concatenate(predictions, axis=0))
+    true_labels = (np.concatenate(true_labels, axis=0))
+    print(f"Accuracy: {accuracy_score(true_labels, pred_labels)}\n \
+          Precsion, Recall, F1-Score Label 1: {precision_recall_fscore_support(true_labels, pred_labels, average='binary', pos_label = 1)}\n\
+          Precsion, Recall, F1-Score Label 0: {precision_recall_fscore_support(true_labels, pred_labels, average='binary', pos_label = 0)}")
+
+
     # return test_acc
       
 
 losses = []
-for epoch in range(0, 1000):
+for epoch in range(0, args.epoch):
     loss = train()
     losses.append(loss)
     if epoch % 10 == 0:

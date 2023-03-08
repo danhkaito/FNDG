@@ -73,15 +73,15 @@ IMBALANCE_THRESH = 101
 #     return lst_weight_edge, lst_edge_type
 
 
-def load_data_fakenews_training(preload, dataset):
+def load_data_fakenews_training(args):
 
-    if preload == False:
-        model_ksom= utils.load_pickle('./model/KSOM/ksom_model_100k_euclid_liar_bert.ckpt')
+    if args.preload == False:
+        model_ksom= utils.load_pickle(f'./model/KSOM/{args.dataset}/{args.name_model}/{args.token_length}_ksom_{args.method_ksom}.ckpt')
         model_ksom.map_PNode2CNode_training('euclid')
         PNodes_arr = np.copy(model_ksom.PNodes)
 
         RADIUS_MAP = model_ksom.MapSize
-        EMBED_DIM = model_ksom.Node_content_Dimension
+        EMBED_DIM = model_ksom.PNodes_content_endcode.shape[1]
 
         node_list = []
 
@@ -140,35 +140,35 @@ def load_data_fakenews_training(preload, dataset):
         G.add_edges_from(edge_list)
 
         pyg = from_networkx(G)
-
+        print(pyg)
         edge_inv = torch.cat((pyg.edge_index[1].view(1,-1), pyg.edge_index[0].view(1,-1)), dim =0)
         pyg.edge_index =  torch.cat((pyg.edge_index, edge_inv), 1)
         pyg.edge_weight = torch.cat((pyg.edge_weight,pyg.edge_weight))
         pyg.edge_type = torch.cat((pyg.edge_type, pyg.edge_type))
 
-        torch.save(pyg, f'./data/{dataset}_training.pt')
+        torch.save(pyg, f'./data/{args.dataset}_training.pt')
         return pyg
     else:
-        pyg = torch.load(f'./data/{dataset}_training.pt')
+        pyg = torch.load(f'./data/{args.dataset}_training.pt')
         return pyg
 
-def load_data_fakenews_testing(preload, dataset):
-    if preload == False:
+def load_data_fakenews_testing(args):
+    if args.preload == False:
 
-        model_ksom= utils.load_pickle('./model/KSOM/ksom_model_100k_euclid_liar_bert.ckpt')
+        model_ksom= utils.load_pickle(f'./model/KSOM/{args.dataset}/{args.name_model}/{args.token_length}_ksom_{args.method_ksom}.ckpt')
 
-        testing_node_embed = np.load('./model_save/Liar/data numpy/test_embed.npy')
-        testing_node_content = np.load('./model_save/Liar/data numpy/test_sentence.npy', allow_pickle=True)
-        testing_node_label = np.load('./model_save/Liar/data numpy/test_label.npy', allow_pickle=True)
-        
-        PNodes_arr_test=utils.create_pnode(corpus=testing_node_content, pre_data=testing_node_embed,labels=testing_node_label)
+        test_sentence = np.load(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/test_sentence_{args.token_length}.npy", allow_pickle=True)
+        test_Y = np.load(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/test_label_{args.token_length}.npy")
+        test_X = np.load(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/test_embedding_{args.token_length}.npy")
+
+        PNodes_arr_test=utils.create_pnode(corpus=test_sentence, pre_data=test_X,labels=test_Y)
 
         model_ksom.map_PNode2CNode_testing('euclid', PNodes_arr_test)
 
         PNodes_arr = np.copy(model_ksom.PNodes)
 
         RADIUS_MAP = model_ksom.MapSize
-        EMBED_DIM = model_ksom.Node_content_Dimension
+        EMBED_DIM = model_ksom.PNodes_content_endcode.shape[1]
         print(EMBED_DIM)
 
 
@@ -240,10 +240,10 @@ def load_data_fakenews_testing(preload, dataset):
         pyg.edge_weight = torch.cat((pyg.edge_weight,pyg.edge_weight))
         pyg.edge_type = torch.cat((pyg.edge_type, pyg.edge_type))
 
-        torch.save(pyg, f'./data/{dataset}_testing.pt')
+        torch.save(pyg, f'./data/{args.dataset}_testing.pt')
         return pyg
     else:
-        pyg = torch.load(f'./data/{dataset}_testing.pt')
+        pyg = torch.load(f'./data/{args.dataset}_testing.pt')
         return pyg
 
 def refine_label_order(labels):
