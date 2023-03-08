@@ -23,7 +23,8 @@ from model.model import *
 data = data_load.load_data_fakenews_training(preload=True, dataset = 'Fake_or_Real')
 
 data_test = data_load.load_data_fakenews_testing(preload=True, dataset= 'Fake_or_Real')
-
+print(data)
+print(data_test)
 # fake_idx = np.squeeze(np.argwhere(data.y == 1))
 # X_fake_train, X_fake_test = train_test_split(fake_idx, test_size=0.2, random_state=42)
 # true_idx = np.squeeze(np.argwhere(data.y == 0))

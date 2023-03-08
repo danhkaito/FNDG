@@ -15,8 +15,6 @@ from torch_geometric.utils.convert import to_networkx, from_networkx
 
 
 IMBALANCE_THRESH = 101
-RADIUS_MAP = 25
-EMBED_DIM = 3000
 
 # def build_graph_ksom(model, ):
 #     graph= nx.Graph()
@@ -83,7 +81,7 @@ def load_data_fakenews_training(preload, dataset):
         PNodes_arr = np.copy(model_ksom.PNodes)
 
         RADIUS_MAP = model_ksom.MapSize
-        EMBED_DIM = 768
+        EMBED_DIM = model_ksom.Node_content_Dimension
 
         node_list = []
 
@@ -158,11 +156,11 @@ def load_data_fakenews_testing(preload, dataset):
     if preload == False:
 
         model_ksom= utils.load_pickle('./model/KSOM/ksom_model_100k_euclid_liar_bert.ckpt')
+
         testing_node_embed = np.load('./model_save/Liar/data numpy/test_embed.npy')
         testing_node_content = np.load('./model_save/Liar/data numpy/test_sentence.npy', allow_pickle=True)
         testing_node_label = np.load('./model_save/Liar/data numpy/test_label.npy', allow_pickle=True)
-        convert_label = lambda t: (t == False).astype(int)
-        testing_node_label = convert_label(testing_node_label)
+        
         PNodes_arr_test=utils.create_pnode(corpus=testing_node_content, pre_data=testing_node_embed,labels=testing_node_label)
 
         model_ksom.map_PNode2CNode_testing('euclid', PNodes_arr_test)
@@ -170,7 +168,8 @@ def load_data_fakenews_testing(preload, dataset):
         PNodes_arr = np.copy(model_ksom.PNodes)
 
         RADIUS_MAP = model_ksom.MapSize
-        EMBED_DIM = 768
+        EMBED_DIM = model_ksom.Node_content_Dimension
+        print(EMBED_DIM)
 
 
         embeddings_content = np.empty((RADIUS_MAP*RADIUS_MAP+len(PNodes_arr)+len(PNodes_arr_test), EMBED_DIM))

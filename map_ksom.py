@@ -4,7 +4,7 @@ from utils import *
 import numpy as np
 
 METHOD = 'euclid'
-model=load_pickle('./model/KSOM/ksom_model_100k_euclid_idf.ckpt')
+model=load_pickle('./model/KSOM/ksom_model_100k_euclid_liar_bert.ckpt')
 model.map_PNode2CNode_training(METHOD)
 
 # for iy, ix in np.ndindex(model.m_Som.shape):
@@ -13,7 +13,7 @@ model.map_PNode2CNode_training(METHOD)
 
 # print(f"Quantization Error {sum_quan_err/len(PNodes_arr)}")
 
-with open("node_ksom.txt", "w+", encoding="utf-8") as f:
+with open("node_ksom_liar_bert.txt", "w+", encoding="utf-8") as f:
     for iy, ix in np.ndindex(model.m_Som.shape):
         cNode = model.m_Som[iy, ix]
         if len(cNode.PNodes) > 0:

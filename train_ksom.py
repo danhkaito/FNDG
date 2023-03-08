@@ -1,18 +1,22 @@
 from model.KSOM.PNode import *
 from model.KSOM.CNode import *
 from model.KSOM.CSom import *
-
+import utils
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
+import math
+import os
 # import pickle 
 # from utils import *
 # import unicodedata as ud
 # import scipy
 # from sklearn.model_selection import train_test_split
 
-METHOD = 'euclid'   # 'euclid' or 'cosin'
-NUM_ITER = 100000
-RADIUS_MAP = 25
+parser = utils.get_parser()
+
+args = parser.parse_args()
+
+METHOD = args.method_ksom   # 'euclid' or 'cosin'
 # Read data
 # train_df = pd.read_csv('benchmark_data\\Liar\\train.csv')
 # test_df = pd.read_csv('benchmark_data\\Liar\\test.csv')
@@ -23,16 +27,16 @@ RADIUS_MAP = 25
 # test_X = train_df['Statement'].values
 # test_Y = train_df['Label'].values
 
-train_X = np.load('./model_save/Liar/data numpy/train_sentence.npy', allow_pickle=True)
-train_Y = np.array(np.load('./model_save/Liar/data numpy/train_label.npy', allow_pickle=True))
-print(train_Y)
-convert_label = lambda t: (t == False).astype(int)
-train_Y = convert_label(train_Y)
+train_sentence = np.load(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/train_sentence.npy", allow_pickle=True)
+train_Y = np.load(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/train_label.npy")
+train_X = np.load(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/train_embedding.npy")
+NUM_ITER = 10*train_X.shape[0]
+
+RADIUS_MAP = int(math.sqrt((5*math.sqrt(train_X.shape[0]))))
 
 # print(len(data_train))
-doc_2_vec = np.load('./model_save/Liar/data numpy/train_embed.npy')
-# doc_2_vec = TfidfVectorizer(min_df = 2, max_df = 0.5, ngram_range = (1,1), stop_words = 'english')
-model = CSom(RADIUS_MAP, train_X, train_Y, NUM_ITER, doc_2_vec)
+# train_X = TfidfVectorizer(min_df = 2, max_df = 0.5, ngram_range = (1,1), stop_words = 'english')
+model = CSom(RADIUS_MAP, train_sentence, train_Y, NUM_ITER, train_X)
 model.Train(METHOD)
 
 # PNodes = TfidfVectorizer()
@@ -45,7 +49,10 @@ model.Train(METHOD)
 #     SuitNode.addPNode(corpus_val[i], PNodes[i])
 
 print("Saving Model...")
-ksom_Weights=open('./model/KSOM/ksom_model_100k_euclid_liar_bert.ckpt', 'wb')
+if not os.path.exists(f'./model/KSOM/{args.dataset}'):
+    os.makedirs(f'./model/KSOM/{args.dataset}')
+
+ksom_Weights=open(f'./model/KSOM/{args.dataset}/ksom_{args.method_ksom}_{NUM_ITER}.ckpt', 'wb')
 model.save(ksom_Weights)
 print("Finish Saving Model")
 

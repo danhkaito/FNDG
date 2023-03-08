@@ -40,37 +40,55 @@ def create_pnode(corpus,  pre_data, labels):
 
 def get_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--no-cuda', action='store_true', default=False,
-                    help='Disables CUDA training.')
+    parser.add_argument('--cuda', action='store_true', default=True,
+                    help='Enable CUDA training.')
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--nhid', type=int, default=64)
-    parser.add_argument('--dataset', type=str, default='cora')
-    parser.add_argument('--size', type=int, default=100)
+    parser.add_argument('--dataset', type=str, default='Liar')
+    parser.add_argument('--num_class', type=int, default=2)
+    parser.add_argument('--name_model', type=str, default='bert-base-cased')
+    parser.add_argument('--method_ksom', type=str, default='euclid')
 
-    parser.add_argument('--epochs', type=int, default=2010,
+    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
+    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
+    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
+    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
+    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
+    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
+    # parser.add_argument('--name_model', type=str, default='bert-base-cased')
+
+    parser.add_argument('--batch_size', type=int, default=16, help='number of size per batch')
+
+    # parser.add_argument('--batch_nums', type=int, default=6000, help='number of batches per epoch')
+    # parser.add_argument('--size', type=int, default=100)
+
+    parser.add_argument('--epoch', type=int, default=5,
                 help='Number of epochs to train.')
-    parser.add_argument('--lr', type=float, default=0.001)
-    parser.add_argument('--weight_decay', type=float, default=5e-4)
+    
+    parser.add_argument('--lr', type=float, default=0.0001)
+    parser.add_argument('--eps', type=float, default=1e-8)
+
+    # parser.add_argument('--weight_decay', type=float, default=5e-4)
     parser.add_argument('--dropout', type=float, default=0.1)
 
-    parser.add_argument('--batch_nums', type=int, default=6000, help='number of batches per epoch')
-    parser.add_argument('--batch_size', type=int, default=40, help='number of batches per epoch')
+    parser.add_argument('--token_length', type=int, default=128)
 
 
-    parser.add_argument('--imbalance', action='store_true', default=False)
-    parser.add_argument('--setting', type=str, default='no', 
-        choices=['no','upsampling', 'smote','reweight','embed_up', 'recon','newG_cls','recon_newG'])
-    #upsampling: oversample in the raw input; smote: ; reweight: reweight minority classes; 
-    # embed_up: 
-    # recon: pretrain; newG_cls: pretrained decoder; recon_newG: also finetune the decoder
 
-    parser.add_argument('--opt_new_G', action='store_true', default=False) # whether optimize the decoded graph based on classification result.
-    parser.add_argument('--load', type=str, default=None)
-    parser.add_argument('--up_scale', type=float, default=1)
-    parser.add_argument('--im_ratio', type=float, default=0.5)
-    parser.add_argument('--rec_weight', type=float, default=0.000001)
-    parser.add_argument('--model', type=str, default='sage', 
-        choices=['sage','gcn','GAT', 'FakeNews'])
+    # parser.add_argument('--imbalance', action='store_true', default=False)
+    # parser.add_argument('--setting', type=str, default='no', 
+    #     choices=['no','upsampling', 'smote','reweight','embed_up', 'recon','newG_cls','recon_newG'])
+    # #upsampling: oversample in the raw input; smote: ; reweight: reweight minority classes; 
+    # # embed_up: 
+    # # recon: pretrain; newG_cls: pretrained decoder; recon_newG: also finetune the decoder
+
+    # parser.add_argument('--opt_new_G', action='store_true', default=False) # whether optimize the decoded graph based on classification result.
+    # parser.add_argument('--load', type=str, default=None)
+    # parser.add_argument('--up_scale', type=float, default=1)
+    # parser.add_argument('--im_ratio', type=float, default=0.5)
+    # parser.add_argument('--rec_weight', type=float, default=0.000001)
+    # parser.add_argument('--model', type=str, default='sage', 
+    #     choices=['sage','gcn','GAT', 'FakeNews'])
 
 
 
