@@ -6,3 +6,5 @@ model_save
 dataset
 trained_model
 __pycache__/
+log.*
+*.pyc
