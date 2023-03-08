@@ -141,11 +141,11 @@ for i in range(0, len(train_labels)):
         print("WRONG")
         print(train_labels[i], labels[i])
 
-with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/train_embedding.npy", "wb") as f:
+with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/train_embedding_{args.token_length}.npy", "wb") as f:
     np.save(f, train_embedding)
-with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/train_label.npy", "wb") as f:
+with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/train_label_{args.token_length}.npy", "wb") as f:
     np.save(f, train_labels)
-with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/train_sentence.npy", "wb") as f:
+with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/train_sentence.npy_{args.token_length}", "wb") as f:
     np.save(f, train_sentence)
 
 ################################################################################
@@ -258,9 +258,9 @@ for i in range(0, len(test_labels)):
         print(test_labels[i], labels[i])
 
 
-with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/test_embedding.npy", "wb") as f:
+with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/test_embedding_{args.token_length}.npy", "wb") as f:
     np.save(f, test_embedding)
-with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/test_label.npy", "wb") as f:
+with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/test_label.npy_{args.token_length}", "wb") as f:
     np.save(f, test_labels)
-with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/test_sentence.npy", "wb") as f:
+with open(f"../clean data/{args.dataset}/data_embedding/{args.name_model}/test_sentence_{args.token_length}.npy", "wb") as f:
     np.save(f, test_sentence)
