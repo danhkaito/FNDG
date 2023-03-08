@@ -4,3 +4,4 @@ Entities
 *.pt
 model_save
 dataset
+trained_model
