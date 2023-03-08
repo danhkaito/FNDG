@@ -5,3 +5,4 @@ Entities
 model_save
 dataset
 trained_model
+__pycache__/
