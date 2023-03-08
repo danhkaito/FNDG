@@ -13,6 +13,7 @@ from tqdm import tqdm
 import seaborn as sns
 import utils
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_recall_fscore_support
 
 parser = utils.get_parser()
 
@@ -207,7 +208,6 @@ def train(model, learning_rate, eps, epochs):
     return training_stats
 
 model = BertClassifier(args.name_model, args.num_class, args.dropout)
-print(model)      
 training_stats = train(model, args.lr, args.eps, args.epoch)
 
 
@@ -243,7 +243,7 @@ training_stats = train(model, args.lr, args.eps, args.epoch)
 # plt.legend()
 # plt.xticks([1, 2, 3, 4, 5])
 
-plt.show()
+# plt.show()
 
 def evaluate_prediction():
     df = pd.read_csv(f"../clean data/{args.dataset}/test.csv")
@@ -332,6 +332,8 @@ def evaluate_prediction():
     print('DONE.')
     pred_labels = (np.concatenate(predictions, axis=0))
     true_labels = (np.concatenate(true_labels, axis=0))
-    print(accuracy_score(true_labels, pred_labels))
+    print(f"Accuracy: {accuracy_score(true_labels, pred_labels)}\n \
+          Precsion, Recall, F1-Score Label 1: {precision_recall_fscore_support(true_labels, pred_labels, average='binary', pos_label = 1)}\n\
+          Precsion, Recall, F1-Score Label 0: {precision_recall_fscore_support(true_labels, pred_labels, average='binary', pos_label = 0)}")
 
 evaluate_prediction()
