@@ -125,8 +125,9 @@ validation_dataloader = DataLoader(
             sampler = SequentialSampler(val_dataset), # Pull out batches sequentially.
             batch_size = batch_size # Evaluate with this batch size.
         )
+model = BertClassifier(args.name_model, args.num_class, args.dropout)
 
-def train(model, learning_rate, eps, epochs):
+def train(learning_rate, eps, epochs):
 
 
     use_cuda = torch.cuda.is_available()
@@ -207,8 +208,7 @@ def train(model, learning_rate, eps, epochs):
         })
     return training_stats
 
-model = BertClassifier(args.name_model, args.num_class, args.dropout)
-training_stats = train(model, args.lr, args.eps, args.epoch)
+training_stats = train(args.lr, args.eps, args.epoch)
 
 
 # Display floats with two decimal places.
