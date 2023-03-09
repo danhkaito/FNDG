@@ -127,25 +127,25 @@ validation_dataloader = DataLoader(
         )
 model = BertClassifier(args.name_model, args.num_class, args.dropout)
 
-def train(learning_rate, eps, epochs):
+use_cuda = torch.cuda.is_available()
+device = torch.device("cuda" if use_cuda else "cpu")
+
+criterion = nn.CrossEntropyLoss()
+optimizer = AdamW(model.parameters(), lr= args.lr, eps=args.eps)
+total_steps = len(train_dataloader) * args.epoch
+
+# Create the learning rate scheduler.
+scheduler = get_linear_schedule_with_warmup(optimizer, 
+                                    num_warmup_steps = 0, # Default value in run_glue.py
+                                    num_training_steps = total_steps)
+
+model = model.to(device)
+criterion = criterion.to(device)
+def train(epochs):
 
 
-    use_cuda = torch.cuda.is_available()
-    device = torch.device("cuda" if use_cuda else "cpu")
-
-    criterion = nn.CrossEntropyLoss()
-    optimizer = AdamW(model.parameters(), lr= learning_rate, eps=eps)
-    total_steps = len(train_dataloader) * args.epoch
-
-    # Create the learning rate scheduler.
-    scheduler = get_linear_schedule_with_warmup(optimizer, 
-                                                num_warmup_steps = 0, # Default value in run_glue.py
-                                                num_training_steps = total_steps)
-
-    model = model.to(device)
 
     training_stats = []
-    criterion = criterion.to(device)
     
     for epoch_num in range(epochs):
 
@@ -208,7 +208,7 @@ def train(learning_rate, eps, epochs):
         })
     return training_stats
 
-training_stats = train(args.lr, args.eps, args.epoch)
+training_stats = train(args.epoch)
 
 
 # Display floats with two decimal places.
