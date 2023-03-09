@@ -89,7 +89,7 @@ learning_rate = args.lr
 decay = 5e-4
 optimizer = torch.optim.Adam(model_fakenew.parameters(), 
                              lr=learning_rate, 
-                             weight_decay=decay)
+                             weight_decay= decay)
 
 
 # Define loss function (CrossEntropyLoss for Classification Problems with 
@@ -145,11 +145,12 @@ def test():
       
 
 losses = []
-for epoch in range(0, args.epoch):
+for epoch in range(0, args.epoch+1):
     loss = train()
     losses.append(loss)
-    if epoch % 10 == 0:
+    if epoch % 5 == 0:
         print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}')
+    if epoch == args.epoch:
         test()
 
 torch.save(model_fakenew, './model/model_fakenew.pt')

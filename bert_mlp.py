@@ -305,7 +305,7 @@ def evaluate_prediction():
                 batch_size = batch_size # Trains with this batch size.
             )
     predictions , true_labels = [], []
-
+    model.eval()
     for batch in test_dataloader:
     # Add batch to GPU
         batch = tuple(t.to(device) for t in batch)
