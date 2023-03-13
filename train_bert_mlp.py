@@ -195,7 +195,7 @@ def train(epochs):
         
         # Early stoping
         if args.early_stopping:
-            if early_stopping.early_stop(total_loss_val, model, "BERT_" + args.dataset):
+            if early_stopping.early_stop(total_loss_val, model, "BERT_" + args.dataset, args.token_length):
                 print(f"Early stopping at epoch: {epoch_num + 1}")
                 break
         
