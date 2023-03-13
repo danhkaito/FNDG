@@ -35,7 +35,7 @@ else:
     print('No GPU available, using the CPU instead.')
     device = torch.device("cpu")
     
-data_saved = torch.load(f"./BERT_fine_tune/BERT_{args.dataset}.pt")
+data_saved = torch.load(f"../BERT_fine_tune/BERT_{args.dataset}.pt")
 
 model = BertClassifier(args.name_model, args.num_class, args.dropout)
 model.load_state_dict(data_saved["model_state_dict"])

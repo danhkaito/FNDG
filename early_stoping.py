@@ -15,9 +15,9 @@ class EarlyStopping:
             self.counter = 0
             
             print("Saving best model...")
-            if not os.path.exists(f'./BERT_fine_tune'):
-                os.makedirs(f'./BERT_fine_tune')
-            torch.save({"model_state_dict": model.state_dict(), "token_length": token_length}, f"./BERT_fine_tune/{model_name}.pt")
+            if not os.path.exists(f'../BERT_fine_tune'):
+                os.makedirs(f'../BERT_fine_tune')
+            torch.save({"model_state_dict": model.state_dict(), "token_length": token_length}, f"../BERT_fine_tune/{model_name}.pt")
             
         elif validation_loss > (self.min_validation_loss + self.min_delta):
             self.counter += 1
