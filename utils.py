@@ -48,19 +48,22 @@ def get_parser():
     parser.add_argument('--num_class', type=int, default=2)
     parser.add_argument('--name_model', type=str, default='bert-base-cased')
     parser.add_argument('--method_ksom', type=str, default='euclid')
-    parser.add_argument('--batch_size', type=int, default=16, help='number of size per batch')
+    parser.add_argument('--batch_size', type=int, default=32, help='number of size per batch')
     parser.add_argument('--preload', type=bool, default=False, help='Preload data')
-
-    parser.add_argument('--epoch', type=int, default=5,
-                help='Number of epochs to train.')
     
-    parser.add_argument('--lr', type=float, default=0.0001)
+    # Use early stopping?
+    parser.add_argument('--early_stopping', type=bool, default=True, help='Use early stopping?')
+    parser.add_argument('--patience', type=int, default=3, help='Patience for suing early stoping')
+
+    parser.add_argument('--epoch', type=int, default=10, help='Number of epochs to train.')
+    
+    parser.add_argument('--lr', type=float, default=2e-5)
     parser.add_argument('--eps', type=float, default=1e-8)
 
     # parser.add_argument('--weight_decay', type=float, default=5e-4)
     parser.add_argument('--dropout', type=float, default=0.1)
 
-    parser.add_argument('--token_length', type=int, default=128)
+    parser.add_argument('--token_length', type=int, default=512)
 
 
 

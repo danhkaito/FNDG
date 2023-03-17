@@ -1,4 +1,7 @@
 # FNDG
 Fake News Detection using Graph
 
-Step 1: Create the folder 'dataset' 
+## Run BERT classification on server
+` conda activate hcmut_env`
+
+`nohup python train_bert_mlp.py --batch_size 8 --dataset 'Liar' > ../Result/liar_log.txt`

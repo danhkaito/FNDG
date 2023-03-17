@@ -2,7 +2,7 @@
 *.ckpt
 Entities
 *.pt
-model_save
+BERT_fine_tune
 dataset
 trained_model
 __pycache__/
