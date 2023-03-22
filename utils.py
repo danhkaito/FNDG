@@ -54,6 +54,7 @@ def get_parser():
     # Use early stopping?
     parser.add_argument('--early_stopping', type=bool, default=True, help='Use early stopping?')
     parser.add_argument('--patience', type=int, default=3, help='Patience for suing early stoping')
+    parser.add_argument('--freeze_pretrain', type=bool, default=False, help='Use freeze pretrain')
 
     parser.add_argument('--epoch', type=int, default=10, help='Number of epochs to train.')
     
