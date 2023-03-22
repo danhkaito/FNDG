@@ -8,3 +8,4 @@ trained_model
 __pycache__/
 log.*
 *.pyc
+model_save
