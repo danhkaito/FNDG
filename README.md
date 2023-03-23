@@ -1,9 +1,7 @@
 # FNDG
 Fake News Detection using Graph
 
-## Run BERT classification
+## Run BERT classification on server
 ` conda activate hcmut_env`
 
-Local: `python bert_mlp.py --epoch 1 --token_length 512 --batch_size 16 --dataset 'FND' --lr 2e-5 > ../Result/log.txt`
-
-Server: `nohup python bert_mlp.py --epoch 1 --token_length 512 --batch_size 16 --dataset 'FND' --lr 2e-5 > ../Result/log.txt`
+`nohup python train_bert_mlp.py --batch_size 8 --dataset 'Liar' > ../Result/liar_log.txt`

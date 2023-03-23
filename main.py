@@ -100,7 +100,7 @@ def train():
     train_loss = 0
     for batch in tqdm(train_loader):
         model_fakenew.train()
-        optimizer.zero_grad() 
+        optimizer.zero_grad()
         # Use all data as input, because all nodes have node features
         batch = batch.to(device)
         out = model_fakenew(batch.x, batch.edge_index) 

@@ -131,6 +131,11 @@ validation_dataloader = DataLoader(
             batch_size = batch_size # Evaluate with this batch size.
         )
 model = BertClassifier(args.name_model, args.num_class, args.dropout)
+# print(model)
+if args.freeze_pretrain is True:
+    print("Hi")
+    for param in model.bert.parameters():
+        param.requires_grad = False
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")

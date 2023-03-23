@@ -129,10 +129,12 @@ def load_data_fakenews_training(args):
             node_list.append((idx, {'x': features_content[idx],'y': int(PNodes_arr[i].label==True), 'train_mask': True, 'test_mask':False}))
 
 
-        edge_list = []
+        edge_list = np.empty((0,3))
         for ix, iy in np.ndindex(model_ksom.m_Som.shape):
             cNode = model_ksom.m_Som[ix, iy]
-            edge_list = edge_list + cNode.create_edge_subgraph(model_ksom)
+            # print(edge_list.shape)
+            edge_sub = cNode.create_edge_subgraph(model_ksom)
+            edge_list = np.append(edge_list, edge_sub, axis = 0)
 
         G = nx.Graph()
 
@@ -140,7 +142,7 @@ def load_data_fakenews_training(args):
         G.add_edges_from(edge_list)
 
         pyg = from_networkx(G)
-        print(pyg)
+        # print(pyg)
         edge_inv = torch.cat((pyg.edge_index[1].view(1,-1), pyg.edge_index[0].view(1,-1)), dim =0)
         pyg.edge_index =  torch.cat((pyg.edge_index, edge_inv), 1)
         pyg.edge_weight = torch.cat((pyg.edge_weight,pyg.edge_weight))
@@ -222,10 +224,10 @@ def load_data_fakenews_testing(args):
             node_list.append((idx, {'x': features_content[idx],'y': int(PNodes_arr_test[i].label==True), 'test_mask':True}))
 
 
-        edge_list = []
+        edge_list = np.empty((0,3))
         for ix, iy in np.ndindex(model_ksom.m_Som.shape):
             cNode = model_ksom.m_Som[ix, iy]
-            edge_list = edge_list + cNode.create_edge_subgraph(model_ksom)
+            edge_list = np.append(edge_list, cNode.create_edge_subgraph(model_ksom), axis = 0)
             
 
         G = nx.Graph()
