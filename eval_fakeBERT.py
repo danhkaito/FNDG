@@ -16,7 +16,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_recall_fscore_support
 from early_stoping import EarlyStopping
 
-FOLDER = '../BERT_fine_tune'
+FOLDER = '../FakeBERT'
 
 parser = utils.get_parser()
 

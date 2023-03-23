@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from transformers import BertTokenizer, get_linear_schedule_with_warmup
-from  model.model import BertClassifier
+from  model.model import fakeBERT
 import torch.nn as nn
 from torch.optim import AdamW
 from torch.utils.data import TensorDataset, random_split
@@ -18,7 +18,7 @@ from early_stoping import EarlyStopping
 
 import os
 
-FOLDER = '../BERT_fine_tune'
+FOLDER = '../FakeBERT'
 
 parser = utils.get_parser()
 
@@ -130,7 +130,7 @@ validation_dataloader = DataLoader(
             sampler = SequentialSampler(val_dataset), # Pull out batches sequentially.
             batch_size = batch_size # Evaluate with this batch size.
         )
-model = BertClassifier(args.name_model, args.num_class, args.dropout)
+model = fakeBERT(args.name_model)
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
