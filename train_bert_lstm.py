@@ -18,7 +18,7 @@ from early_stoping import EarlyStopping
 
 import os
 
-FOLDER = '../FakeBERT'
+FOLDER = '../BERT_LSTM'
 
 parser = utils.get_parser()
 
