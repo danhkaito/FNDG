@@ -50,7 +50,7 @@ class CNode(Node):
             i+=1
         node_arr = np.asarray(node_arr)
         print(node_arr.shape)
-        dist = scipy.spatial.distance.pdist(node_arr, metric='cosine')
+        dist = scipy.spatial.distance.pdist(node_arr, metric='euclidean')
         num_edge = length*(length-1)/2
         top_k = int(3*num_edge/4)
         top_idx = np.argpartition(dist, -top_k)[-top_k:]
