@@ -96,7 +96,27 @@ class fakeBERT(nn.Module):
 
         return out
     
-    
+
+class BertLSTM(nn.Module):
+    def __init__(self , name_model,  n_class = 2, embedding_dim= 768, hidden_dim= 128, n_layers = 1, drop_prob=0.2):
+        super(BertLSTM, self).__init__()
+        self.n_class = n_class
+        self.n_layers = n_layers
+        self.hidden_dim = hidden_dim
+        
+        self.bert = BertModel.from_pretrained(name_model)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers, dropout=drop_prob, batch_first=True)
+        self.dropout = nn.Dropout(drop_prob)
+        self.linear = nn.Linear(hidden_dim, n_class)
+        
+    def forward(self, input_id, mask):
+        embeds, _ = self.bert(input_ids = input_id, attention_mask = mask, return_dict=False)
+
+        lstm_out, _ = self.lstm(embeds)
+
+        out = self.linear(lstm_out[:,-1])
+        return out
+
 
 class FakeNewsModel(torch.nn.Module):
     def __init__(self, hidden_channels_1, hidden_channels_2, num_feature_concat, num_content_feature, num_style_feature, num_classes):
