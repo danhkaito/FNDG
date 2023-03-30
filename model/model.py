@@ -105,7 +105,7 @@ class BertLSTM(nn.Module):
         self.hidden_dim = hidden_dim
         
         self.bert = BertModel.from_pretrained(name_model)
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers, dropout=drop_prob, batch_first=True)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim, n_layers, batch_first=True)
         self.dropout = nn.Dropout(drop_prob)
         self.linear = nn.Linear(hidden_dim, n_class)
         
@@ -113,8 +113,13 @@ class BertLSTM(nn.Module):
         embeds, _ = self.bert(input_ids = input_id, attention_mask = mask, return_dict=False)
 
         lstm_out, _ = self.lstm(embeds)
+        
+        lstm_out = self.dropout(lstm_out)
 
-        out = self.linear(lstm_out[:,-1])
+        lstm_out = lstm_out[:,-1]
+
+        out = self.linear(lstm_out)
+
         return out
 
 
