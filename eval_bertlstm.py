@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from transformers import BertTokenizer, get_linear_schedule_with_warmup
-from  model.model import BertClassifier
+from  model.model import BertLSTM
 import torch.nn as nn
 from torch.optim import AdamW
 from torch.utils.data import TensorDataset, random_split
@@ -37,7 +37,7 @@ else:
     print('No GPU available, using the CPU instead.')
     device = torch.device("cpu")
 
-model = BertClassifier(args.name_model, args.num_class, args.dropout)
+model = BertLSTM(args.name_model)
 model.load_state_dict(torch.load(f"{FOLDER}/{args.dataset}.pt"))
 model = model.to(device)
 
